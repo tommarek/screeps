@@ -1,3 +1,7 @@
+require('prototype.creep');
+require('prototype.room');
+require('prototype.spawn');
+
 var constants = require('constants');
 
 module.exports.loop = function() {
@@ -9,33 +13,22 @@ module.exports.loop = function() {
     }
   }
 
-  for (var room in Game.rooms) {
+  for (var room_name in Game.rooms) {
+    var room = Game.rooms[room_name];
+
     for (var role_name in constants.roles) {
       var role_details = constants.roles[role_name];
       var creeps = _.filter(Game.creeps, (creep) => creep.memory.role == role_name);
+
       if (creeps.length < role_details.required) {
         var newName = role_name + Game.time;
         console.log('Spawning new ' + role_name + ': ' + newName);
-        let spawn = room.prototype.getAvailableSpawn();
-        spawn.spawnCreep([WORK, CARRY, MOVE], newName, {
-          memory: {
-            role: 'harvester',
-            home_room: room.name;
-          };
+        let spawns = _.filter(Game.spawns, (spawn) => spawn.room == room);
+        spawns[0].spawnCreep(role_details.body, newName, {
+          memory: { role: role_name, home_room: room.name,}
         });
       }
     }
-  }
-
-  if (Game.spawns['Spawn1'].spawning) {
-    var spawningCreep = Game.creeps[Game.spawns['Spawn1'].spawning.name];
-    Game.spawns['Spawn1'].room.visual.text(
-      '🛠️' + spawningCreep.memory.role,
-      Game.spawns['Spawn1'].pos.x + 1,
-      Game.spawns['Spawn1'].pos.y, {
-        align: 'left',
-        opacity: 0.8
-      });
   }
 
   // var tower = Game.getObjectById('TOWER_ID');
