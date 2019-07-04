@@ -11,21 +11,8 @@ Object.defineProperty(Room.prototype, 'sources', {
     configurable: true
 });
 
-Object.defineProperty(Room.prototype, 'availableSpawn', {
-    get: function() {
-      let available_spawns = _.filter(Game.spawns, (spawn) => spawn.room == this);
-      // let available_spawns = _.filter(Game.spawns, (spawn) => {spawn.room == this && spawn.spawning == false};
-      if (available_spawns.length > 0) return available_spawns[0];
-      return null;
-    },
-    enumerable: false,
-    configurable: true
-});
-
-
 Room.prototype.getAvailableSpawn = function() {
-  let available_spawns = _.filter(Game.spawns, (spawn) => spawn.room == this);
-  // let available_spawns = _.filter(Game.spawns, (spawn) => {spawn.room == this && spawn.spawning == false};
+  let available_spawns = _.filter(Game.spawns, (spawn) => {return spawn.room == this && !spawn.spawning});
   if (available_spawns.length > 0) return available_spawns[0];
   return null;
 };

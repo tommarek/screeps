@@ -13,6 +13,7 @@ module.exports.loop = function() {
     }
   }
 
+
   for (var room_name in Game.rooms) {
     var room = Game.rooms[room_name];
 
@@ -23,10 +24,15 @@ module.exports.loop = function() {
       if (creeps.length < role_details.required) {
         var newName = role_name + Game.time;
         console.log('Spawning new ' + role_name + ': ' + newName);
-        let spawns = _.filter(Game.spawns, (spawn) => spawn.room == room);
-        spawns[0].spawnCreep(role_details.body, newName, {
-          memory: { role: role_name, home_room: room.name,}
-        });
+        let available_spawn = room.getAvailableSpawn();
+        if (available_spawn) {
+          available_spawn.spawnCreep(role_details.body, newName, {
+            memory: {
+              role: role_name,
+              home_room: room,
+            }
+          });
+        }
       }
     }
   }
@@ -48,6 +54,6 @@ module.exports.loop = function() {
 
   for (var name in Game.creeps) {
     var creep = Game.creeps[name];
-    creep.prototype.runRole();
+    creep.runRole();
   }
 }

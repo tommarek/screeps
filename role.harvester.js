@@ -1,6 +1,5 @@
 var roleHarvester = {
 
-  /** @param {Creep} creep **/
   run: function(creep) {
     if (creep.carry.energy < creep.carryCapacity) {
       var source = creep.findSource();
@@ -31,11 +30,8 @@ var roleHarvester = {
           });
         }
       } else {
-        creep.memory.target = "5d1c52458694760156828874"
-        let controller = Game.getObjectById(creep.memory.target);
-        creep.moveTo(controller, {
-          maxRooms: 1
-        });
+        let controller = creep.memory.home_room.controller;
+        creep.moveTo(controller);
       }
     }
   }

@@ -12,12 +12,12 @@ var body_parts_prices = {
 var roles = {
   harvester: {
     code: require('role.harvester'),
-    required: 2,
+    required: 3,
     body: [WORK, WORK, CARRY, MOVE, MOVE]
   },
   upgrader: {
     code: require('role.upgrader'),
-    required: 2,
+    required: 3,
     body: [WORK, CARRY, MOVE, MOVE, MOVE]
   },
   builder: {
