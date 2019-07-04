@@ -1,7 +1,8 @@
-var roleBuilder = {
+var roleFixer = {
   run: function(creep) {
 
     if (creep.memory.working && creep.carry.energy == 0) {
+      if (creep.memory.target && creep.memory.target.hits == creep.memory.target.hitsMax) creep.memory.target = null;
       creep.memory.working = false;
       creep.say('🔄 harvest');
     }
@@ -11,9 +12,15 @@ var roleBuilder = {
     }
 
     if (creep.memory.working) {
-      target = creep.findConstruction() || creep.findRepair();
+      // repair first - if we've already repaired something
+      let target = null;
+      if (creep.memory.target && creep.memory.target.hits != creep.memory.target.hitMax) {
+        target = creep.memory.target;
+      } else {
+        target = creep.findRepair() || target.findConstruction();
+      }
       if (target) {
-        if (creep.build(target) == ERR_NOT_IN_RANGE) {
+        if (creep.repair(target) == ERR_NOT_IN_RANGE) {
           creep.moveTo(target, {
             visualizePathStyle: {
               stroke: '#ffffff'
@@ -40,4 +47,4 @@ var roleBuilder = {
   }
 };
 
-module.exports = roleBuilder;
+module.exports = roleFixer;

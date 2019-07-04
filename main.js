@@ -26,7 +26,7 @@ module.exports.loop = function() {
         console.log('Spawning new ' + role_name + ': ' + newName);
         let available_spawn = room.getAvailableSpawn();
         if (available_spawn) {
-          available_spawn.spawnCreep(role_details.body, newName, {
+          available_spawn.createCustomCreep(role_details.body, newName, {
             memory: {
               role: role_name,
               home_room: room,
@@ -51,6 +51,17 @@ module.exports.loop = function() {
   //     tower.attack(closestHostile);
   //   }
   // }
+
+  if (Game.spawns['Spawn1'].spawning) {
+    var spawningCreep = Game.creeps[Game.spawns['Spawn1'].spawning.name];
+    Game.spawns['Spawn1'].room.visual.text(
+      '🛠️' + spawningCreep.memory.role,
+      Game.spawns['Spawn1'].pos.x + 1,
+      Game.spawns['Spawn1'].pos.y, {
+        align: 'left',
+        opacity: 0.8
+      });
+  }
 
   for (var name in Game.creeps) {
     var creep = Game.creeps[name];
