@@ -4,7 +4,20 @@ Creep.prototype.runRole = function() {
   constants.roles[this.memory.role].code.run(this)
 };
 
+Creep.prototype.doTask = function(target) {
+    if (this.memory.task == 'build') return this.build(target);
+    if (this.memory.task == 'repair') return this.repair(target);
+    if (this.memory.task == 'harvest') return this.harvest(target);
+}
+
+Creep.prototype.genBody = function(priority={}) {
+  for (var bodyPart in constants.body_parts_prices) {
+
+  }
+}
+
 Creep.prototype.findSource = function() {
+  this.memory.task = 'harvest';
   var source = this.pos.findClosestByRange(FIND_SOURCES_ACTIVE);
   if (source) {
     if (this.moveTo(source) !== ERR_NO_PATH) {
@@ -17,6 +30,48 @@ Creep.prototype.findSource = function() {
   return null;
 };
 
+Creep.prototype.findTransferTarget = function(structureTypes=[STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_TOWER]) {
+  this.memory.task = 'transfer';
+  var target = undefined;
+  for (var i in structureTypes) {
+    target = this.pos.findClosestByRange(FIND_STRUCTURES, {
+      filter: (s) => s.structureType == structureTypes[i] && s.energy < s.energyCapacity
+    });
+    if (target) return target;
+  }
+  return target;
+};
+
+Creep.prototype.findRepair = function(structureTypes=undefined) {
+  this.memory.task = 'repair';
+  var target;
+  if (structureTypes) {
+    for (var i in structureTypes) {
+      target = this.pos.findClosestByRange(FIND_STRUCTURES, {
+        filter: (s) => s.structureType == structureTypes[i] && s.hits < constants.repairThreshold*s.hitsMax
+      });
+      if (target) return target;
+    }
+  } else {
+    return this.pos.findClosestByRange(FIND_STRUCTURES, {
+      filter: (s) => s.hits < constants.repairThreshold*s.hitsMax
+    });
+  }
+};
+
+Creep.prototype.findBattleRepair = function() {
+  this.memory.task = 'repair';
+  return this.pos.findClosestByRange(FIND_STRUCTURES, {
+      filter: (s) => ((s.structureType === STRUCTURE_RAMPART && s.hits < constants.repairThreshold*s.hitsMax) || (s.structureType === STRUCTURE_WALL && s.hits < constants.repairThreshold*s.hitsMax))
+    });
+};
+
+Creep.prototype.findConstruction = function() {
+  this.memory.task = 'build';
+  return this.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
+};
+
+// Movement
 Creep.prototype.setLastPosition = function() {
   this.memory.lastPosition = this.pos;
 };
@@ -25,47 +80,8 @@ Creep.prototype.isStuck = function() {
   return !(this.memory.lastPosition == this.pos);
 };
 
-
-
-Creep.prototype.findRepair = function() {
-  return this.pos.findClosestByRange(FIND_STRUCTURES, {
-    filter: (s) => s.hits < constants.repairThreshold*s.hitsMax
-  });
-};
-
-Creep.prototype.findBattleRepair = function() {
-  return this.pos.findClosestByRange(FIND_STRUCTURES, {
-      filter: (s) => ((s.structureType === STRUCTURE_RAMPART && s.hits < constants.repairThreshold*s.hitsMax) || (s.structureType === STRUCTURE_WALL && s.hits < constants.repairThreshold*s.hitsMax))
-    });
-};
-
-Creep.prototype.findConstruction = function() {
-  return this.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
-};
-
-// Movement
-Creep.prototype.myMoveTo = function(target, opts={}, fix=true) {
+// do not try to come up with a new path every single tick - only when stuck
+Creep.prototype.myMoveTo = function(target, opts={}) {
   this.moveTo(target, opts);
-  if (fix) this.repair(this.findRepair());
+  if (constants.walkAndRepair) this.repair(this.findRepair([STRUCTURE_ROAD, STRUCTURE_TOWER]));
 }
-
-// Creep.prototype.moveToMem = function(target, opts={}) {
-//   if (this.pos == target.pos) {
-//       console.log(this.name + ': on the position');
-//       return OK;
-//   }
-
-//   else if (!this.memory.movement || this.memory.movement.target.id != target.id || this.isStuck()) {
-//     console.log(this.name + ': stuck, this_pos: '+this.pos);
-//     this.memory.movement = {target:target, path: null};
-//   }
-
-//   if (!this.memory.movement.path) {
-//     console.log(this.name + ': finding new path');
-//     this.memory.movement.path = this.pos.findPathTo(target, opts);
-//   }
-
-//   this.setLastPosition();
-//   console.log(this.name + ': moving, last_pos: '+this.lastPosition);
-//   return this.moveByPath(this.memory.movement.path)
-// }

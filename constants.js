@@ -33,6 +33,8 @@ var roles = {
 };
 
 var repairThreshold = 0.8;
+var walkAndRepair = true;
+var essentialBodyParts = [WORK, CARRY, MOVE];
 
 module.exports = {
   body_parts_prices: body_parts_prices,

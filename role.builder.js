@@ -3,28 +3,21 @@ var roleBuilder = {
 
     if (creep.memory.working && creep.carry.energy == 0) {
       creep.memory.working = false;
-      creep.say('🔄 harvest');
+      creep.say('ð harvest');
     }
     if (!creep.memory.working && creep.carry.energy == creep.carryCapacity) {
       creep.memory.working = true;
-      creep.say('🚧 work');
+      creep.say('ð§ work');
     }
 
+    let target;
     if (creep.memory.working) {
       target = creep.findConstruction() || creep.findRepair();
-      if (target) {
-        if (creep.build(target) == ERR_NOT_IN_RANGE) {
-          creep.moveTo(target, {
-            visualizePathStyle: {
-              stroke: '#ffffff'
-            },
-            maxRooms: 1
-          });
-        }
-      }
     } else {
-      let target = creep.findSource();
-      if (creep.harvest(target) == ERR_NOT_IN_RANGE) {
+      target = creep.findSource();
+    }
+    if (target) {
+      if (creep.doTask(target) == ERR_NOT_IN_RANGE) {
         creep.moveTo(target, {
           visualizePathStyle: {
             stroke: '#ffaa00'

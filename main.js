@@ -37,20 +37,21 @@ module.exports.loop = function() {
     }
   }
 
-  // var tower = Game.getObjectById('TOWER_ID');
-  // if (tower) {
-  //   var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
-  //     filter: (structure) => structure.hits < structure.hitsMax
-  //   });
-  //   if (closestDamagedStructure) {
-  //     tower.repair(closestDamagedStructure);
-  //   }
-  //
-  //   var closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
-  //   if (closestHostile) {
-  //     tower.attack(closestHostile);
-  //   }
-  // }
+  // TOOD: find all towers! (prototype.game.js)
+  var tower = Game.getObjectById('5d1e2e718a9c3b645e913b01');
+  if (tower) {
+    var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
+      filter: (structure) => structure.hits < structure.hitsMax
+    });
+    if (closestDamagedStructure) {
+      tower.repair(closestDamagedStructure);
+    }
+
+    var closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+    if (closestHostile) {
+      tower.attack(closestHostile);
+    }
+  }
 
   if (Game.spawns['Spawn1'].spawning) {
     var spawningCreep = Game.creeps[Game.spawns['Spawn1'].spawning.name];

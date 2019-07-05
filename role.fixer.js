@@ -2,36 +2,22 @@ var roleFixer = {
   run: function(creep) {
 
     if (creep.memory.working && creep.carry.energy == 0) {
-      if (creep.memory.target && creep.memory.target.hits == creep.memory.target.hitsMax) creep.memory.target = null;
       creep.memory.working = false;
-      creep.say('🔄 harvest');
+      creep.say('harvest');
     }
     if (!creep.memory.working && creep.carry.energy == creep.carryCapacity) {
       creep.memory.working = true;
-      creep.say('🚧 work');
+      creep.say('work');
     }
 
+    let target;
     if (creep.memory.working) {
-      // repair first - if we've already repaired something
-      let target = null;
-      if (creep.memory.target && creep.memory.target.hits != creep.memory.target.hitMax) {
-        target = creep.memory.target;
-      } else {
-        target = creep.findRepair() || target.findConstruction();
-      }
-      if (target) {
-        if (creep.repair(target) == ERR_NOT_IN_RANGE) {
-          creep.moveTo(target, {
-            visualizePathStyle: {
-              stroke: '#ffffff'
-            },
-            maxRooms: 1
-          });
-        }
-      }
+      target = creep.findRepair() || creep.findConstruction();
     } else {
-      let target = creep.findSource();
-      if (creep.harvest(target) == ERR_NOT_IN_RANGE) {
+      target = creep.findSource();
+    }
+    if (target) {
+      if (creep.doTask(target) == ERR_NOT_IN_RANGE) {
         creep.moveTo(target, {
           visualizePathStyle: {
             stroke: '#ffaa00'
