@@ -40,13 +40,14 @@ module.exports.loop = function() {
   // TOOD: find all towers! (prototype.game.js)
   var tower = Game.getObjectById('5d1e2e718a9c3b645e913b01');
   if (tower) {
-    var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
-      filter: (structure) => structure.hits < structure.hitsMax
-    });
-    if (closestDamagedStructure) {
-      tower.repair(closestDamagedStructure);
+    if (tower.energy > tower.energyCapacity / 2) {
+      var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
+        filter: (structure) => structure.hits < structure.hitsMax
+      });
+      if (closestDamagedStructure) {
+        tower.repair(closestDamagedStructure);
+      }
     }
-
     var closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
     if (closestHostile) {
       tower.attack(closestHostile);
