@@ -23,15 +23,17 @@ module.exports.loop = function() {
 
       if (creeps.length < role_details.required) {
         var newName = role_name + Game.time;
-        console.log('Spawning new ' + role_name + ': ' + newName);
         let available_spawn = room.getAvailableSpawn();
         if (available_spawn) {
-          available_spawn.createCustomCreep(role_details.body, newName, {
+          let newBody = available_spawn.genBody(repeating=role_details.body.repeating, fixed=role_details.body.fixed, room.energyCapacityAvailable)
+          console.log('Spawning new ' + role_name + ': ' + newName + 'body: ' + newBody)
+          log exitCode = available_spawn.spawnCreep(newBody, newName, {
             memory: {
               role: role_name,
               home_room: room,
             }
           });
+          if (exitCode == OK) break;
         }
       }
     }

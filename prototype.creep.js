@@ -83,5 +83,8 @@ Creep.prototype.isStuck = function() {
 // do not try to come up with a new path every single tick - only when stuck
 Creep.prototype.myMoveTo = function(target, opts={}) {
   this.moveTo(target, opts);
-  if (constants.walkAndRepair) this.repair(this.findRepair([STRUCTURE_ROAD, STRUCTURE_TOWER]));
+  if (constants.walkAndRepair) {
+      var target = this.findRepair([STRUCTURE_ROAD, STRUCTURE_TOWER]);
+      this.repair(target);
+  }
 }
