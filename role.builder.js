@@ -1,13 +1,16 @@
 var roleBuilder = {
-  run: function(creep) {
+  repeatingBody: [WORK, WORK, CARRY, CARRY, MOVE],
+  fixedBody: [WORK, CARRY, MOVE],
+  run: function() {
+    var creep = this.creep;
 
     if (creep.memory.working && creep.carry.energy == 0) {
       creep.memory.working = false;
-      creep.say('ð harvest');
+      creep.say('harvest');
     }
     if (!creep.memory.working && creep.carry.energy == creep.carryCapacity) {
       creep.memory.working = true;
-      creep.say('ð§ work');
+      creep.say('work');
     }
 
     let target;

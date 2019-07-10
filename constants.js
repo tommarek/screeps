@@ -38,6 +38,18 @@ var roles = {
     required: 1,
     body: {repeating: [WORK, WORK, CARRY, CARRY, MOVE], fixed: [WORK, CARRY, MOVE]}
   },
+  miner: {
+    code: require('role.miner'),
+    required: 1,
+    //body: {repeating: [WORK], fixed: [CARRY, MOVE]}
+    body: {repeating: [], fixed: [WORK, CARRY, MOVE]}
+  },
+  primaryhauler: {
+    code: require('role.primaryhauler'),
+    required: 1,
+    //body: {repeating: [CARRY, CARRY, MOVE], fixed: [WORK, CARRY, MOVE]}
+    body: {repeating: [], fixed: [WORK, CARRY, MOVE]}
+  },
 };
 
 var repairThreshold = 0.8;

@@ -1,19 +1,9 @@
 var constants = require('constants');
 
-Creep.prototype.runRole = function() {
-  constants.roles[this.memory.role].code.run(this)
-};
-
 Creep.prototype.doTask = function(target) {
     if (this.memory.task == 'build') return this.build(target);
     if (this.memory.task == 'repair') return this.repair(target);
     if (this.memory.task == 'harvest') return this.harvest(target);
-}
-
-Creep.prototype.genBody = function(priority={}) {
-  for (var bodyPart in constants.body_parts_prices) {
-
-  }
 }
 
 Creep.prototype.findSource = function() {
@@ -30,6 +20,7 @@ Creep.prototype.findSource = function() {
   return null;
 };
 
+// move these to roles
 Creep.prototype.findTransferTarget = function(structureTypes=[STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_TOWER]) {
   this.memory.task = 'transfer';
   var target = undefined;
@@ -80,7 +71,7 @@ Creep.prototype.isStuck = function() {
   return !(this.memory.lastPosition == this.pos);
 };
 
-// do not try to come up with a new path every single tick - only when stuck
+// TODO: do not try to come up with a new path every single tick - only when stuck
 Creep.prototype.myMoveTo = function(target, opts={}) {
   this.moveTo(target, opts);
   if (constants.walkAndRepair) {

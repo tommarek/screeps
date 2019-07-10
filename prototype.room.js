@@ -11,8 +11,24 @@ Object.defineProperty(Room.prototype, 'sources', {
     configurable: true
 });
 
+
 Room.prototype.getAvailableSpawn = function() {
   let available_spawns = _.filter(Game.spawns, (spawn) => {return spawn.room == this && !spawn.spawning});
   if (available_spawns.length > 0) return available_spawns[0];
   return null;
 };
+
+
+Room.prototype.getSourcesNotMined = function () {
+  var ret = [];
+  var miners = this.find(FIND_MY_CREEPS, {filter: (s) => s.memory.role == 'miner' && s.memory.sourceId});
+  var targetIDs = miners.map(m => m.memory.source.id);
+
+  for (var i in this.sources) {
+    var source = this.sources[i];
+    if (!targetIDs.includes(source.id)) {
+      ret.push(source);
+    }
+  }
+  return ret;
+}

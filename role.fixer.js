@@ -1,5 +1,8 @@
 var roleFixer = {
-  run: function(creep) {
+  repeatingBody: [WORK, WORK, CARRY, CARRY, MOVE],
+  fixedBody: [WORK, CARRY, MOVE],
+  run: function() {
+    var creep = this.creep;
 
     if (creep.memory.working && creep.carry.energy == 0) {
       creep.memory.working = false;
@@ -27,10 +30,6 @@ var roleFixer = {
       }
     }
   },
-
-  genBody: function(creep) {
-    // here we will generate body parts based on the
-  }
 };
 
 module.exports = roleFixer;

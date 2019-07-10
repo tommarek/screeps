@@ -1,7 +1,8 @@
 var roleUpgrader = {
-
-  /** @param {Creep} creep **/
-  run: function(creep) {
+  repeatingBody: [WORK, WORK, CARRY, CARRY, MOVE],
+  fixedBody: [WORK, CARRY, MOVE],
+  run: function() {
+    var creep = this.creep;
 
     if (creep.memory.upgrading && creep.carry.energy == 0) {
       creep.memory.upgrading = false;

@@ -1,8 +1,10 @@
 require('prototype.creep');
 require('prototype.room');
 require('prototype.spawn');
+require('prototype.roomposition');
 
 var constants = require('constants');
+var roleManager = require('rolemanager');
 
 module.exports.loop = function() {
 
@@ -26,8 +28,8 @@ module.exports.loop = function() {
         let available_spawn = room.getAvailableSpawn();
         if (available_spawn) {
           let newBody = available_spawn.genBody(repeating=role_details.body.repeating, fixed=role_details.body.fixed, room.energyCapacityAvailable)
-          console.log('Spawning new ' + role_name + ': ' + newName + 'body: ' + newBody)
-          log exitCode = available_spawn.spawnCreep(newBody, newName, {
+          console.log('Spawning new ' + role_name + ': ' + newName + 'body: ' + newBody);
+          let exitCode = available_spawn.spawnCreep(newBody, newName, {
             memory: {
               role: role_name,
               home_room: room,
@@ -44,7 +46,7 @@ module.exports.loop = function() {
   if (tower) {
     if (tower.energy > tower.energyCapacity / 2) {
       var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
-        filter: (structure) => structure.hits < structure.hitsMax
+        filter: (structure) => structure.hits < structure.hitsMax && structure.hits < 500000
       });
       if (closestDamagedStructure) {
         tower.repair(closestDamagedStructure);
@@ -67,8 +69,5 @@ module.exports.loop = function() {
       });
   }
 
-  for (var name in Game.creeps) {
-    var creep = Game.creeps[name];
-    creep.runRole();
-  }
+  roleManager.runRoles(Game.creeps);
 }
