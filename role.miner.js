@@ -22,7 +22,6 @@ var roleMiner = {
               creep.memory.sourceId = source.id;
               creep.memory.containerId = containers[i].id;
               creep.memory.primaryHaulerId = null;
-              creep.memory.primaryHalerNeeded = true;
             }
           }
         }
@@ -32,7 +31,6 @@ var roleMiner = {
       creep.memory.sourceId = source.id;
       creep.memory.containerId = undefined;
       creep.memory.primaryHaulerId = null;
-      creep.memory.primaryHalerNeeded = true;
     }
   },
 
@@ -73,6 +71,8 @@ var roleMiner = {
   },
 
   destructor: function() {
+    var creep = this.creep;
+
 
   }
 };
