@@ -11,6 +11,9 @@ module.exports = {
       this.creep.memory.initialised = true;
     }
     this.action(this.creep);
+    if (this.creep.ticksToLive == 1){
+      this.destructor();
+    }
   },
   constructor: function() {},
   destructor: function() {},
