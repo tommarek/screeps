@@ -20,17 +20,17 @@ var body_parts_prices = {
 var roles = {
   harvester: {
     code: require('role.harvester'),
-    required: 3,
+    required: 2,
     body: {repeating: [WORK, WORK, CARRY, CARRY, MOVE], fixed: [WORK, CARRY, MOVE]}
   },
   upgrader: {
     code: require('role.upgrader'),
-    required: 2,
+    required: 1,
     body: {repeating: [WORK, WORK, CARRY, CARRY, MOVE], fixed: [WORK, CARRY, MOVE]}
   },
   builder: {
     code: require('role.builder'),
-    required: 2,
+    required: 1,
     body: {repeating: [WORK, WORK, CARRY, CARRY, MOVE], fixed: [WORK, CARRY, MOVE]}
   },
   fixer: {
@@ -40,13 +40,13 @@ var roles = {
   },
   miner: {
     code: require('role.miner'),
-    required: 1,
+    required: 0,
     //body: {repeating: [WORK], fixed: [CARRY, MOVE]}
     body: {repeating: [], fixed: [WORK, CARRY, MOVE]}
   },
   primaryhauler: {
     code: require('role.primaryhauler'),
-    required: 1,
+    required: 0,
     //body: {repeating: [CARRY, CARRY, MOVE], fixed: [WORK, CARRY, MOVE]}
     body: {repeating: [], fixed: [WORK, CARRY, MOVE]}
   },
