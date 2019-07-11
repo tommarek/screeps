@@ -1,6 +1,5 @@
 require('prototype.roomposition');
 
-
 var roleMiner = {
   repeatingBody: [WORK],
   fixedBody: [WORK, CARRY, MOVE],
@@ -21,7 +20,6 @@ var roleMiner = {
               creep.memory.position = spotsAroundSource[sid];
               creep.memory.sourceId = source.id;
               creep.memory.containerId = containers[i].id;
-              creep.memory.primaryHaulerId = null;
             }
           }
         }
@@ -30,7 +28,6 @@ var roleMiner = {
       creep.memory.position = spotsAroundSource[0];
       creep.memory.sourceId = source.id;
       creep.memory.containerId = undefined;
-      creep.memory.primaryHaulerId = null;
     }
   },
 
@@ -39,7 +36,7 @@ var roleMiner = {
     var sources = creep.room.getSourcesNotMined();
     if (sources.length > 0) {
       for (let id in sources) {
-        if (this.getMiningPosition(creep, sources[id])) {
+        if (this.getMiningPosition(sources[id])) {
           creep.say('Initialisation Success')
           break;
         }
@@ -54,7 +51,6 @@ var roleMiner = {
     if (!creep.memory.sourceId) {
       this.constructor();
     } else {
-      let container = Game.getObjectById(creep.memory.containerId);
       if (creep.pos.isEqualTo(creep.memory.position.x, creep.memory.position.y)) {
         creep.harvest(Game.getObjectById(creep.memory.sourceId))
       } else {
@@ -65,16 +61,11 @@ var roleMiner = {
         });
       }
 
+      let container = Game.getObjectById(creep.memory.containerId);
       if (container.hits < container.hitsMax) creep.repair(container);
       if (creep.carry.energy == creep.carryCapacity) creep.transfer(container, RESOURCE_ENERGY);
     }
   },
-
-  destructor: function() {
-    var creep = this.creep;
-
-
-  }
 };
 
 module.exports = roleMiner;

@@ -40,13 +40,13 @@ var roles = {
   },
   miner: {
     code: require('role.miner'),
-    required: 0,
+    required: 2,
     //body: {repeating: [WORK], fixed: [CARRY, MOVE]}
     body: {repeating: [], fixed: [WORK, CARRY, MOVE]}
   },
-  primaryhauler: {
-    code: require('role.primaryhauler'),
-    required: 0,
+  dumptruck: {
+    code: require('role.dumptruck'),
+    required: 2,
     //body: {repeating: [CARRY, CARRY, MOVE], fixed: [WORK, CARRY, MOVE]}
     body: {repeating: [], fixed: [WORK, CARRY, MOVE]}
   },

@@ -22,11 +22,11 @@ Room.prototype.getAvailableSpawn = function() {
 Room.prototype.getSourcesNotMined = function () {
   var ret = [];
   var miners = this.find(FIND_MY_CREEPS, {filter: (s) => s.memory.role == 'miner' && s.memory.sourceId});
-  var targetIDs = miners.map(m => m.memory.source.id);
+  var targetIds = miners.map(m => m.memory.sourceId);
 
   for (var i in this.sources) {
     var source = this.sources[i];
-    if (!targetIDs.includes(source.id)) {
+    if (!targetIds.includes(source.id)) {
       ret.push(source);
     }
   }
