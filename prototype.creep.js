@@ -39,13 +39,13 @@ Creep.prototype.findRepair = function(structureTypes=undefined) {
   if (structureTypes) {
     for (var i in structureTypes) {
       target = this.pos.findClosestByRange(FIND_STRUCTURES, {
-        filter: (s) => s.structureType == structureTypes[i] && s.hits < constants.repairThreshold*s.hitsMax
+        filter: (s) => s.structureType == structureTypes[i] && s.hits < constants.repairThreshold*s.hitsMax && s.hits < 1000000
       });
       if (target) return target;
     }
   } else {
     return this.pos.findClosestByRange(FIND_STRUCTURES, {
-      filter: (s) => s.hits < constants.repairThreshold*s.hitsMax
+      filter: (s) => s.hits < constants.repairThreshold*s.hitsMax && s.hits < 1000000
     });
   }
 };

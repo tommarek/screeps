@@ -12,18 +12,11 @@ var roleMiner = {
       filter: (s) => s.structureType == STRUCTURE_CONTAINER
     });
     if (containers.length > 0) {
-      for (i in containers) {
-        var spotsAroundContainer = containers[i].pos.getAdjacentxEnterable();
-        for (var sid in spotsAroundSource) {
-          for (var cid in spotsAroundContainer) {
-            if (spotsAroundSource[sid].isEqualTo(spotsAroundContainer[cid])) {
-              creep.memory.position = spotsAroundSource[sid];
-              creep.memory.sourceId = source.id;
-              creep.memory.containerId = containers[i].id;
-            }
-          }
-        }
-      }
+      var container = containers[0];
+      creep.memory.position = container.pos;
+      creep.memory.sourceId = source.id;
+      creep.memory.containerId = containers[0].id;
+
     } else {
       creep.memory.position = spotsAroundSource[0];
       creep.memory.sourceId = source.id;
@@ -52,7 +45,15 @@ var roleMiner = {
       this.constructor();
     } else {
       if (creep.pos.isEqualTo(creep.memory.position.x, creep.memory.position.y)) {
-        creep.harvest(Game.getObjectById(creep.memory.sourceId))
+        // TODO this should probably be done by every creep - don't waste resources!
+        var droppedEnergy = creep.pos.findInRange(FIND_DROPPED_RESOURCES, 2);
+          console.log('droppedEnergy:'+droppedEnergy.length);
+        if (droppedEnergy.length > 0) {
+          creep.pickup(droppedEnergy[0]);
+        } else {
+          console.log('harvesting');
+          creep.harvest(Game.getObjectById(creep.memory.sourceId));
+        }
       } else {
         creep.moveTo(creep.memory.position.x, creep.memory.position.y, {
           visualizePathStyle: {

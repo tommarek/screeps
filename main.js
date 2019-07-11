@@ -27,7 +27,7 @@ module.exports.loop = function() {
         var newName = role_name + Game.time;
         let available_spawn = room.getAvailableSpawn();
         if (available_spawn) {
-          let newBody = available_spawn.genBody(repeating=role_details.body.repeating, fixed=role_details.body.fixed, room.energyCapacityAvailable)
+          let newBody = available_spawn.genBody(repeating = role_details.body.repeating, fixed = role_details.body.fixed, costLimit = 1200)
           console.log('Spawning new ' + role_name + ': ' + newName + 'body: ' + newBody);
           let exitCode = available_spawn.spawnCreep(newBody, newName, {
             memory: {
@@ -39,24 +39,28 @@ module.exports.loop = function() {
         }
       }
     }
-  }
 
-  // TOOD: find all towers! (prototype.game.js)
-  var tower = Game.getObjectById('5d1e2e718a9c3b645e913b01');
-  if (tower) {
-    if (tower.energy > tower.energyCapacity / 2) {
-      var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
-        filter: (structure) => structure.hits < structure.hitsMax && structure.hits < 500000
-      });
-      if (closestDamagedStructure) {
-        tower.repair(closestDamagedStructure);
+    // TOOD: find all towers!(prototype.game.js)
+    var towers = room.find(FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_TOWER}});
+    for (var tid in towers){
+      var tower = towers[tid];
+      if (tower) {
+        if (tower.energy > tower.energyCapacity / 2) {
+          var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
+            filter: (structure) => structure.hits < structure.hitsMax && structure.hits < 500000
+          });
+          if (closestDamagedStructure) {
+            tower.repair(closestDamagedStructure);
+          }
+        }
+        var closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+        if (closestHostile) {
+          tower.attack(closestHostile);
+        }
       }
     }
-    var closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
-    if (closestHostile) {
-      tower.attack(closestHostile);
-    }
   }
+
 
   if (Game.spawns['Spawn1'].spawning) {
     var spawningCreep = Game.creeps[Game.spawns['Spawn1'].spawning.name];

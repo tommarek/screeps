@@ -18,43 +18,71 @@ var body_parts_prices = {
 };
 
 var roles = {
-  harvester: {
-    code: require('role.harvester'),
-    required: 2,
-    body: {repeating: [WORK, WORK, CARRY, CARRY, MOVE], fixed: [WORK, CARRY, MOVE]}
+  // harvester: {
+  //   code: require('role.harvester'),
+  //   required: 0,
+  //   body: {
+  //     repeating: [WORK, WORK, CARRY, CARRY, MOVE],
+  //     fixed: [WORK, CARRY, MOVE]
+  //   }
+  // },
+  hauler: {
+    code: require('role.hauler'),
+    required: 1,
+    body: {
+      repeating: [CARRY, CARRY, MOVE],
+      fixed: [WORK, CARRY, MOVE]
+    }
   },
   upgrader: {
     code: require('role.upgrader'),
     required: 1,
-    body: {repeating: [WORK, WORK, CARRY, CARRY, MOVE], fixed: [WORK, CARRY, MOVE]}
+    body: {
+      repeating: [WORK, WORK, CARRY, CARRY, MOVE],
+      fixed: [WORK, CARRY, MOVE]
+    }
   },
   builder: {
     code: require('role.builder'),
     required: 1,
-    body: {repeating: [WORK, WORK, CARRY, CARRY, MOVE], fixed: [WORK, CARRY, MOVE]}
+    body: {
+      repeating: [WORK, WORK, CARRY, CARRY, MOVE],
+      fixed: [WORK, CARRY, MOVE]
+    }
   },
   fixer: {
     code: require('role.fixer'),
     required: 1,
-    body: {repeating: [WORK, WORK, CARRY, CARRY, MOVE], fixed: [WORK, CARRY, MOVE]}
+    body: {
+      repeating: [WORK, WORK, CARRY, CARRY, MOVE],
+      fixed: [WORK, CARRY, MOVE]
+    }
   },
   miner: {
     code: require('role.miner'),
     required: 2,
-    //body: {repeating: [WORK], fixed: [CARRY, MOVE]}
-    body: {repeating: [], fixed: [WORK, CARRY, MOVE]}
+    body: {
+      repeating: [WORK],
+      fixed: [CARRY, MOVE]
+    }
   },
   dumptruck: {
     code: require('role.dumptruck'),
     required: 2,
-    //body: {repeating: [CARRY, CARRY, MOVE], fixed: [WORK, CARRY, MOVE]}
-    body: {repeating: [], fixed: [WORK, CARRY, MOVE]}
+    body: {
+      repeating: [CARRY, CARRY, MOVE],
+      fixed: [WORK, CARRY, MOVE]
+    }
   },
 };
 
 var repairThreshold = 0.8;
 var walkAndRepair = true;
-var essentialBodyParts = {WORK: 1, CARRY: 1, MOVE: 1};
+var essentialBodyParts = {
+  WORK: 1,
+  CARRY: 1,
+  MOVE: 1
+};
 
 module.exports = {
   body_parts_prices: body_parts_prices,
