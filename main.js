@@ -27,9 +27,9 @@ module.exports.loop = function() {
         var newName = role_name + Game.time;
         let available_spawn = room.getAvailableSpawn();
         if (available_spawn) {
-          let newBody = available_spawn.genBody(repeating = role_details.body.repeating, fixed = role_details.body.fixed, costLimit = 1200)
+          let newBody = available_spawn.genBody(repeating = role_details.body.repeating, fixed = role_details.body.fixed, costLimit=1100)
           console.log('Spawning new ' + role_name + ': ' + newName + 'body: ' + newBody);
-          let exitCode = available_spawn.spawnCreep(newBody, newName, {
+          var exitCode = available_spawn.spawnCreep(newBody, newName, {
             memory: {
               role: role_name,
               home_room: room,
@@ -65,7 +65,7 @@ module.exports.loop = function() {
   if (Game.spawns['Spawn1'].spawning) {
     var spawningCreep = Game.creeps[Game.spawns['Spawn1'].spawning.name];
     Game.spawns['Spawn1'].room.visual.text(
-      '🛠️' + spawningCreep.memory.role,
+      'ð ï¸' + spawningCreep.memory.role,
       Game.spawns['Spawn1'].pos.x + 1,
       Game.spawns['Spawn1'].pos.y, {
         align: 'left',

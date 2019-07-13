@@ -26,6 +26,14 @@ var roles = {
   //     fixed: [WORK, CARRY, MOVE]
   //   }
   // },
+  distanceharvester: {
+    code: require('role.distanceharvester'),
+    required: 2,
+    body: {
+      repeating: [WORK, CARRY, CARRY, MOVE, MOVE],
+      fixed: [CARRY, MOVE]
+    }
+  },
   hauler: {
     code: require('role.hauler'),
     required: 1,
@@ -52,7 +60,7 @@ var roles = {
   },
   fixer: {
     code: require('role.fixer'),
-    required: 1,
+    required: 0,
     body: {
       repeating: [WORK, WORK, CARRY, CARRY, MOVE],
       fixed: [WORK, CARRY, MOVE]
@@ -63,7 +71,7 @@ var roles = {
     required: 2,
     body: {
       repeating: [WORK],
-      fixed: [CARRY, MOVE]
+      fixed: [CARRY, MOVE, MOVE, MOVE]
     }
   },
   dumptruck: {

@@ -6,7 +6,7 @@ var roleBuilder = {
 
     if (creep.memory.working && creep.carry.energy == 0) {
       creep.memory.working = false;
-      creep.say('harvest');
+      creep.say('withdraw');
     }
     if (!creep.memory.working && creep.carry.energy == creep.carryCapacity) {
       creep.memory.working = true;
@@ -17,7 +17,7 @@ var roleBuilder = {
     if (creep.memory.working) {
       target = creep.findConstruction() || creep.findRepair();
     } else {
-      target = creep.findSource();
+      target = creep.findStorage();
     }
     if (target) {
       if (creep.doTask(target) == ERR_NOT_IN_RANGE) {

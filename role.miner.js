@@ -46,12 +46,10 @@ var roleMiner = {
     } else {
       if (creep.pos.isEqualTo(creep.memory.position.x, creep.memory.position.y)) {
         // TODO this should probably be done by every creep - don't waste resources!
-        var droppedEnergy = creep.pos.findInRange(FIND_DROPPED_RESOURCES, 2);
-          console.log('droppedEnergy:'+droppedEnergy.length);
+        var droppedEnergy = creep.pos.findInRange(FIND_DROPPED_RESOURCES, 1);
         if (droppedEnergy.length > 0) {
           creep.pickup(droppedEnergy[0]);
         } else {
-          console.log('harvesting');
           creep.harvest(Game.getObjectById(creep.memory.sourceId));
         }
       } else {

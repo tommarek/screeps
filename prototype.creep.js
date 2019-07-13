@@ -4,6 +4,7 @@ Creep.prototype.doTask = function(target) {
     if (this.memory.task == 'build') return this.build(target);
     if (this.memory.task == 'repair') return this.repair(target);
     if (this.memory.task == 'harvest') return this.harvest(target);
+    if (this.memory.task == 'withdraw_energy') return this.withdraw(target, RESOURCE_ENERGY);
 }
 
 Creep.prototype.findSource = function() {
@@ -61,6 +62,11 @@ Creep.prototype.findConstruction = function() {
   this.memory.task = 'build';
   return this.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
 };
+
+Creep.prototype.findStorage = function() {
+  this.memory.task = 'withdraw_energy';
+  return this.room.storage;
+}
 
 // Movement
 Creep.prototype.setLastPosition = function() {

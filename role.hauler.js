@@ -14,9 +14,9 @@ var roleHauler = {
     }
 
     if (!creep.memory.working) {
-      var source = creep.room.storage;
-      if (creep.withdraw(source, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-        creep.myMoveTo(source, {
+      var target = creep.findStorage();
+      if (creep.doTask(target) == ERR_NOT_IN_RANGE) {
+        creep.myMoveTo(target, {
           visualizePathStyle: {
             stroke: '#ffaa00'
           },

@@ -36,10 +36,14 @@ var roleDumpTruck = {
       if (creep.memory.state == 'load') {
         if (creep.carry.energy == creep.carryCapacity) {
           creep.memory.state = 'dump';
-          console.log(creep.memory.state)
         } else {
-          if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-            creep.myMoveTo(container);
+          var droppedEnergy = creep.pos.findInRange(FIND_DROPPED_RESOURCES, 1);
+          if (droppedEnergy.length > 0) {
+            creep.pickup(droppedEnergy[0]);
+          } else {
+            if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+              creep.myMoveTo(container);
+            }
           }
         }
       } else {
