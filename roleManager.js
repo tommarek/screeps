@@ -24,13 +24,12 @@ RoleManager.prototype.initTick = function() {
 }
 
 // TODO do something with the timing
-RoleManager.prototype.runRoleCreep = function(creep) {
-  console.log('running role: ' + creep);
+RoleManager.prototype.runRoleCreep = function(creepID) {
+  const creep = Game.getObjectById(creepID)
   if (creep.spawning) return;
 
   const role = creep.memory.role;
   if (!role || !this.roles[role]) return;
-  console.log('role:' + role);
 
   const startTime = Game.cpu.getUsed;
   this.stats.total += 1;
@@ -44,8 +43,8 @@ RoleManager.prototype.runRoleCreep = function(creep) {
 
 }
 
-RoleManager.prototype.runRoleCreeps = function(creeps) {
-  _.each(creeps, creep => this.runRoleCreep(creep));
+RoleManager.prototype.runRoleCreeps = function(creepIDs) {
+  _.each(creepIDs, creepID => this.runRoleCreep(creepID));
 }
 
 module.exports = RoleManager;

@@ -26,7 +26,6 @@ ProcessCreeps.prototype.run = function() {
   this.roleManager.initTick();
   _.each(Game.creepsByRole, (creeps, role) => {
     overseer.runSubprocess('role.' + role, () => {
-      console.log('role: ' + role + ', creeps:' + creeps)
       this.roleManager.runRoleCreeps(creeps);
     });
   });

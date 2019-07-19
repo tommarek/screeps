@@ -2,11 +2,11 @@ var constants = require('constants');
 
 Creep.prototype.registerCreep = function() {
   if (!Game.creepsByRole[this.memory.role]) Game.creepsByRole[this.memory.role] = {};
-  Game.creepsByRole[this.memory.role][this.name] = this;
+  Game.creepsByRole[this.memory.role][this.name] = this.id;
 
   if (!this.room.creepsByRole) this.room.creepsByRole = {};
   if (!this.room.creepsByRole[this.role]) this.room.creepsByRole[this.memory.role] = {};
-  this.room.creepsByRole[this.memory.role][this.name] = this;
+  this.room.creepsByRole[this.memory.role][this.name] = this.id;
 }
 
 
