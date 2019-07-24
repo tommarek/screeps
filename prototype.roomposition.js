@@ -42,7 +42,7 @@ RoomPosition.prototype.getAdjacent = function () {
 }
 
 
-RoomPosition.prototype.getAdjacentxEnterable = function() {
+RoomPosition.prototype.getAdjacentEnterable = function() {
   var ret = [];
   var adjacent = this.getAdjacent();
   for (var i in adjacent) {

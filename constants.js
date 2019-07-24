@@ -20,7 +20,7 @@ const constants = {
 
   processes: {
     INIT: 'process.init',
-    CREEPS: 'process.creeps',
+    TASKER: 'process.tasker',
   },
 
   roles: {

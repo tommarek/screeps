@@ -1,24 +1,26 @@
 var constants = require('constants');
 
-Creep.prototype.registerCreep = function() {
+Creep.prototype.initCreep = function() {
   if (!Game.creepsByRole[this.memory.role]) Game.creepsByRole[this.memory.role] = {};
   Game.creepsByRole[this.memory.role][this.name] = this.id;
 
   if (!this.room.creepsByRole) this.room.creepsByRole = {};
   if (!this.room.creepsByRole[this.role]) this.room.creepsByRole[this.memory.role] = {};
   this.room.creepsByRole[this.memory.role][this.name] = this.id;
+
+  this.resetTasker();
 }
 
-
-Creep.prototype.doTask = function(target) {
-  if (this.memory.task == 'build') return this.build(target);
-  if (this.memory.task == 'repair') return this.repair(target);
-  if (this.memory.task == 'harvest') return this.harvest(target);
-  if (this.memory.task == 'withdraw_energy') return this.withdraw(target, RESOURCE_ENERGY);
+Creep.prototype.resetTasker = function() {
+  this.memory.tasker = {
+    task: undefined,
+    targetID: undefined,
+    taskOptions: {},
+    taskCondition: undefined,
+  }
 }
 
 Creep.prototype.findSource = function() {
-  this.memory.task = 'harvest';
   var source = this.pos.findClosestByRange(FIND_SOURCES_ACTIVE);
   if (source) {
     if (this.moveTo(source) !== ERR_NO_PATH) {
@@ -33,7 +35,6 @@ Creep.prototype.findSource = function() {
 
 // move these to roles
 Creep.prototype.findTransferTarget = function(structureTypes = [STRUCTURE_SPAWN, STRUCTURE_EXTENSION, STRUCTURE_TOWER]) {
-  this.memory.task = 'transfer';
   var target = undefined;
   for (var i in structureTypes) {
     target = this.pos.findClosestByRange(FIND_STRUCTURES, {
@@ -45,7 +46,6 @@ Creep.prototype.findTransferTarget = function(structureTypes = [STRUCTURE_SPAWN,
 };
 
 Creep.prototype.findRepair = function(structureTypes = undefined) {
-  this.memory.task = 'repair';
   var target;
   if (structureTypes) {
     for (var i in structureTypes) {
@@ -62,19 +62,16 @@ Creep.prototype.findRepair = function(structureTypes = undefined) {
 };
 
 Creep.prototype.findBattleRepair = function() {
-  this.memory.task = 'repair';
   return this.pos.findClosestByRange(FIND_STRUCTURES, {
     filter: (s) => ((s.structureType === STRUCTURE_RAMPART && s.hits < constants.repairThreshold * s.hitsMax) || (s.structureType === STRUCTURE_WALL && s.hits < constants.repairThreshold * s.hitsMax))
   });
 };
 
 Creep.prototype.findConstruction = function() {
-  this.memory.task = 'build';
   return this.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
 };
 
 Creep.prototype.findStorage = function() {
-  this.memory.task = 'withdraw_energy';
   return this.room.storage;
 }
 

@@ -22,8 +22,8 @@ module.exports = {
 
     this.clean();
 
-    overseer.runProcess(constants.processes.INIT, constants.processes.INIT, {});
-    overseer.runProcess(constants.processes.CREEPS, constants.processes.CREEPS, {});
+    overseer.runProcess(constants.processes.INIT, {});
+    overseer.runProcess(constants.processes.TASKER, {});
 
     // OLD stuff
 
