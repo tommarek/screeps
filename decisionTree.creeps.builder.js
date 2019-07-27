@@ -1,60 +1,36 @@
+'use strict';
+
 const DecisionCase = require('decisionCase');
 
-
-// decisionTree
-const DTBuilder = new DecisionCase(
-  true,
-  Array(
-    new DecisionCase(isEmpty(c), DTBuilderEmpty),
-    new DecisionCase(true, DTBuilderNotEmpty),
-  )
-);
-const DTBuilderEmpty = new DecisionCase(
-  true,
-  Array(
-    new DecisionCase(isCloseEnoughToWithdraw(c), actionWithdrawEnergy),
-    new DecisionCase(true, actionMoveToGetEnergy),
-  ),
-  assignTargetWithdrawEnergy
-);
-const DTBuilderNotEmpty = new DecisionCase(
-  true,
-  Array(
-    new DecisionCase(isCloseEnoughToBuild(c), actionBuild),
-    new DecisionCase(true, actionMoveToBuild),
-  ),
-  assignTargetBuild
-);
-
 // checks
-const once = (c) => {return true};
-const isEmpty = (c) => {c.carry.energy == 0};
-const isWithinDistanceToTarget = (c, range) => {
-  const task = overseer.getTask(c);
+const once = function(c) {return true};
+const isEmpty = function(c) {return c.carry.energy == 0};
+const isWithinDistanceToTarget = function(c, range) {
+  const task = overseer.tasker.getTask(c);
   return c.pos.getRangeTo(task.target) <= range
 };
-const isCloseEnoughToBuild = (c) => {isWithinDistanceToTarget(c, 3)};
-const isCloseEnoughToWithdraw = (c) => {isWithinDistanceToTarget(c, 1)};
+const isCloseEnoughToBuild = function(c) {return isWithinDistanceToTarget(c, 3)};
+const isCloseEnoughToWithdraw = function(c) {return isWithinDistanceToTarget(c, 1)};
 
 //targetting
 const assignTargetBuild = function(c) {
   let task = overseer.tasker.getTask(c);
-  task.target = c.findConstruction() || c.findRepair();
+  task.assignTarget(c.findConstruction() || c.findRepair());
   overseer.tasker.setTask(task);
 };
 const assignTargetWithdrawEnergy = function(c) {
   let task = overseer.tasker.getTask(c);
-  task.target = c.findStorage();
+  task.assignTarget(c.findStorage());
   overseer.tasker.setTask(task);
 };
 
 // Actions
-const actionBuild(c) {
+const actionBuild = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignBuild(
-    target = task.target,
-    taskEndCondition = (c) => {
-      let task = overseer.tasker.getActiveTask(c);
+    task.target,
+    (c) => {
+      let task = overseer.tasker.getTask(c);
       if (task.lastReturn != OK || isEmpty(c)) {
         return true;
       }
@@ -64,23 +40,23 @@ const actionBuild(c) {
   overseer.tasker.setTask(task);
 };
 
-const actionWithdrawEnergy(c) {
+const actionWithdrawEnergy = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignWithdaw(
-    target = task.target,
-    taskEndCondition = once,
-    resourceType = RESOURCE_ENERGY,
-    amount = c.carryCapacity,
+    task.target,
+    once,
+    RESOURCE_ENERGY,
+    c.carryCapacity,
   );
   overseer.tasker.setTask(task);
 };
 
-const actionMoveToGetEnergy(c) {
+const actionMoveToGetEnergy = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
-    target = task.target,
-    taskEndCondition = isCloseEnoughToWithdraw,
-    taskOptions = {
+    task.target,
+    isCloseEnoughToWithdraw,
+    {
       visualizePathStyle: {
         stroke: '#ffffff'
       },
@@ -89,12 +65,12 @@ const actionMoveToGetEnergy(c) {
   overseer.tasker.setTask(task);
 };
 
-const actionMoveToBuild(c) {
-  let task = overseer.tasker.getNewTaskCreep(c);
+const actionMoveToBuild = function(c) {
+  let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
-    target = task.target,
-    taskEndCondition = isCloseEnoughToBuild,
-    taskOptions = {
+    task.target,
+    isCloseEnoughToBuild,
+    {
       visualizePathStyle: {
         stroke: '#ffffff'
       },
@@ -103,5 +79,29 @@ const actionMoveToBuild(c) {
   overseer.tasker.setTask(task);
 };
 
+// decisionTree
+const DTBuilderNotEmpty = new DecisionCase(
+  true,
+  Array(
+    new DecisionCase(isCloseEnoughToBuild, actionBuild),
+    new DecisionCase(true, actionMoveToBuild),
+  ),
+  assignTargetBuild
+);
+const DTBuilderEmpty = new DecisionCase(
+  true,
+  Array(
+    new DecisionCase(isCloseEnoughToWithdraw, actionWithdrawEnergy),
+    new DecisionCase(true, actionMoveToGetEnergy),
+  ),
+  assignTargetWithdrawEnergy
+);
+const DTBuilder = new DecisionCase(
+  true,
+  Array(
+    new DecisionCase(isEmpty, DTBuilderEmpty),
+    new DecisionCase(true, DTBuilderNotEmpty),
+  )
+);
 
 module.exports = DTBuilder;

@@ -11,12 +11,11 @@
  * @param {func} preHook
  *   Pre decision hook to be run before the evaluation process
  */
-DecisionCase = function(predicate, action, preHook=undefined) {
+const DecisionCase = function(predicate, action, preHook=undefined) {
   this.predicate = predicate;
   this.action = action;
   this.preHook = preHook;
 };
-
 
 DecisionCase.prototype.nomatch = {
   match: false
@@ -43,7 +42,7 @@ DecisionCase.prototype.match = (v) => {
  * @returns {match: boolean, result: object}
  *   match indicates if DecisionCase was a match, result contains result of applied action
  */
-DecisionCase.prototype.evaluate: function(object) {
+DecisionCase.prototype.evaluate = function(object) {
   // run preHook if defined
   if (this.preHook) this.preHook(object);
 
@@ -52,7 +51,6 @@ DecisionCase.prototype.evaluate: function(object) {
     match = match(object);
 
   if (match) {
-
     if (this.action instanceof Function)
       return this.match(this.action(object));
 
@@ -80,3 +78,5 @@ DecisionCase.prototype.evaluate: function(object) {
   }
   return this.nomatch;
 };
+
+module.exports = DecisionCase;

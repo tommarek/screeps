@@ -4,73 +4,94 @@ const Task = function(object, task = undefined, taskOptions = undefined, target,
   this.object = object;
   this.task = task;
   this.target = target;
-  this.taskEndCondition: taskCondition;
+  this.taskEndCondition = taskCondition;
   this.lastReturn = undefined;
 }
 
 Task.prototype.execute = function() {
   if (!this.task) return undefined;
-  this.lastReturn = this. [this.task]();
+  overseer.tasker.logger.debug('EXECUTING creep '+ this.object.name + ', task: ' + this.task + ' target: ' + this.target);
+  this.lastReturn = this[this.task]();
   return this.lastReturn;
 }
 
-Task.prototype.taskEnded = this.taskEndCondition(c);
+Task.prototype.taskEnded = function() {
+    if (this.taskEndCondition === undefined) return undefined;
+    return this.taskEndCondition(this.object)
+};
 
-Task.prototype.build = () => {
+Task.prototype.refreshObject = function() {
+    this.object = Game.getObjectById(this.object.id);
+}
+
+Task.prototype.assignTarget = function(target) {
+    this.target = target
+}
+
+Task.prototype.build = function() {
   return this.object.build(this.target)
 }
 Task.prototype.assignBuild = function(target, taskEndCondition) {
   this.task = 'build'
   this.target = target;
-  this.taskEndCondition = taskCondition;
+  this.taskEndCondition = taskEndCondition;
 };
 
-Task.prototype.harvest = () => {
+Task.prototype.harvest = function() {
   return this.object.harvest(this.target)
 }
 Task.prototype.assignHarvest = function(target, taskEndCondition) {
   this.task = 'harvest';
   this.target = target;
-  this.taskEndCondition = taskCondition;
+  this.taskEndCondition = taskEndCondition;
 };
 
-Task.prototype.moveTo = () => {
-  return this.object.moveTo(this.target, this.taskOptions)
+Task.prototype.moveTo = function() {
+  this.object.moveTo(this.target, this.taskOptions);
 };
 Task.prototype.assignMoveTo = function(target, taskEndCondition, taskOptions = {}) {
   this.task = 'moveTo';
   this.target = target;
-  this.taskEndCondition = taskCondition;
+  this.taskEndCondition = taskEndCondition;
   this.taskOptions = taskOptions;
 };
 
-Task.prototype.repair = () => {
+Task.prototype.repair = function() {
   return this.object.repair(this.target)
 };
 Task.prototype.assignRepair = function(target, taskEndCondition) {
   this.task = 'repair';
   this.target = target;
-  this.taskEndCondition = taskCondition;
+  this.taskEndCondition = taskEndCondition;
 };
 
-Task.prototype.transfer = () => {
+Task.prototype.transfer = function() {
   return this.object.transfer(this.target, this.resourceType, this.amount)
 };
 Task.prototype.assignTransfer = function(target, taskEndCondition, resourceType, amount) {
   this.task = 'transfer';
   this.target = target;
-  this.taskEndCondition = taskCondition;
+  this.taskEndCondition = taskEndCondition;
   this.resourceType = resourceType;
   this.amount = amount;
 };
 
-Task.prototype.withdraw = () => {
+Task.prototype.upgrade = function() {
+  return this.object.upgradeController(this.target)
+};
+Task.prototype.assignUpgrade = function(target, taskEndCondition) {
+  this.task = 'upgrade';
+  this.target = target;
+  this.taskEndCondition = taskEndCondition;
+};
+
+Task.prototype.withdraw = function() {
   return this.object.withdraw(this.target, this.resourceType, this.amount)
 };
 Task.prototype.assignWithdaw = function(target, taskEndCondition, resourceType, amount) {
   this.task = 'withdraw';
   this.target = target;
-  this.taskEndCondition = taskCondition;
+  this.taskEndCondition = taskEndCondition;
   this.resourceType = resourceType;
   this.amount = amount;
 };

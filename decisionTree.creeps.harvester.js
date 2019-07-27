@@ -1,37 +1,13 @@
+'use strict';
+
 const DecisionCase = require('decisionCase');
-
-
-// decisionTree
-const DTHarvester = new DecisionCase(
-  true,
-  Array(
-    new DecisionCase(isEmpty(c), DTHarvesterEmpty),
-    new DecisionCase(true, DTHarvesterNotEmpty),
-  )
-);
-const DTHarvesterEmpty = new DecisionCase(
-  true,
-  Array(
-    new DecisionCase(isCloseEnoughToHarvest(c), actionHarvestEnergy),
-    new DecisionCase(true, actionMoveToSource),
-  ),
-  assignTargetHarvest
-);
-const DTHarvesterNotEmpty = new DecisionCase(
-  true,
-  Array(
-    new DecisionCase(isCloseEnoughToTransfer(c), actionTransfer),
-    new DecisionCase(true, actionMoveToTransfer),
-  ),
-  assignTargetTransfer
-);
 
 // checks
 const once = (c) => {return true};
-const isEmpty = (c) => {c.carry.energy == 0};
-const isFull = (c) => {_.sum(c.carry) == c.carryCapacity};
+const isEmpty = (c) => {return c.carry.energy == 0};
+const isFull = (c) => {return _.sum(c.carry) == c.carryCapacity};
 const isWithinDistanceToTarget = (c, range) => {
-  const task = overseer.getTask(c);
+  const task = overseer.tasker.getTask(c);
   return c.pos.getRangeTo(task.target) <= range
 };
 const isCloseEnoughToHarvest = (c) => {isWithinDistanceToTarget(c, 1)};
@@ -50,7 +26,7 @@ const assignTargetHarvest = function(c) {
 };
 
 // Actions
-const actionTransfer(c) {
+const actionTransfer = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignTransfer(
     target = task.target,
@@ -59,7 +35,7 @@ const actionTransfer(c) {
   overseer.tasker.setTask(task);
 };
 
-const actionHarvestEnergy(c) {
+const actionHarvestEnergy = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignHarvest(
     target = task.target,
@@ -68,7 +44,7 @@ const actionHarvestEnergy(c) {
   overseer.tasker.setTask(task);
 };
 
-const actionMoveToSource(c) {
+const actionMoveToSource = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
     target = task.target,
@@ -82,8 +58,8 @@ const actionMoveToSource(c) {
   overseer.tasker.setTask(task);
 };
 
-const actionMoveToTransfer(c) {
-  let task = overseer.tasker.getNewTaskCreep(c);
+const actionMoveToTransfer = function(c) {
+  let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
     target = task.target,
     taskEndCondition = isCloseEnoughToBuild,
@@ -95,5 +71,30 @@ const actionMoveToTransfer(c) {
   );
   overseer.tasker.setTask(task);
 };
+
+// decisionTree
+const DTHarvesterEmpty = new DecisionCase(
+  true,
+  Array(
+    new DecisionCase(isCloseEnoughToHarvest, actionHarvestEnergy),
+    new DecisionCase(true, actionMoveToSource),
+  ),
+  assignTargetHarvest
+);
+const DTHarvesterNotEmpty = new DecisionCase(
+  true,
+  Array(
+    new DecisionCase(isCloseEnoughToTransfer, actionTransfer),
+    new DecisionCase(true, actionMoveToTransfer),
+  ),
+  assignTargetTransfer
+);
+const DTHarvester = new DecisionCase(
+  true,
+  Array(
+    new DecisionCase(isEmpty, DTHarvesterEmpty),
+    new DecisionCase(true, DTHarvesterNotEmpty),
+  )
+);
 
 module.exports = DTHarvester;

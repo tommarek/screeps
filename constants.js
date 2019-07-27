@@ -32,24 +32,21 @@ const constants = {
     //     fixed: [WORK, CARRY, MOVE]
     //   }
     // },
-    distanceharvester: {
-      code: require('role.distanceharvester'),
-      required: 2,
-      body: {
-        repeating: [WORK, CARRY, CARRY, MOVE, MOVE],
-        fixed: [CARRY, MOVE]
-      }
-    },
+    // distanceharvester: {
+    //   required: 2,
+    //   body: {
+    //     repeating: [WORK, CARRY, CARRY, MOVE, MOVE],
+    //     fixed: [CARRY, MOVE]
+    //   }
+    // },
     hauler: {
-      code: require('role.hauler'),
-      required: 1,
+      required: 2,
       body: {
         repeating: [CARRY, CARRY, MOVE],
         fixed: [WORK, CARRY, MOVE]
       }
     },
     upgrader: {
-      code: require('role.upgrader'),
       required: 1,
       body: {
         repeating: [WORK, WORK, CARRY, CARRY, MOVE],
@@ -57,7 +54,6 @@ const constants = {
       }
     },
     builder: {
-      code: require('role.builder'),
       required: 1,
       body: {
         repeating: [WORK, WORK, CARRY, CARRY, MOVE],
@@ -65,7 +61,6 @@ const constants = {
       }
     },
     fixer: {
-      code: require('role.fixer'),
       required: 0,
       body: {
         repeating: [WORK, WORK, CARRY, CARRY, MOVE],
@@ -73,21 +68,19 @@ const constants = {
       }
     },
     miner: {
-      code: require('role.miner'),
-      required: 2,
+      required: 0,
       body: {
         repeating: [WORK],
         fixed: [CARRY, MOVE, MOVE, MOVE]
       }
     },
-    dumptruck: {
-      code: require('role.dumptruck'),
-      required: 2,
-      body: {
-        repeating: [CARRY, CARRY, MOVE],
-        fixed: [WORK, CARRY, MOVE]
-      }
-    },
+    // dumptruck: {
+    //   required: 2,
+    //   body: {
+    //     repeating: [CARRY, CARRY, MOVE],
+    //     fixed: [WORK, CARRY, MOVE]
+    //   }
+    // },
   },
 
   repairThreshold: 0.8,

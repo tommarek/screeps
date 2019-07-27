@@ -2,15 +2,16 @@
 
 const Logger = require('logger');
 const RoomAnalyzer = require('roomAnalyzer');
-const Tasker = require('tasker';)
+const Tasker = require('tasker');
 
 
 //TODO: timing of processess
 const Overseer = function() {
   if (!Memory.overseer) Memory.overseer = {};
-  this.tasker = new Tasker();
   this.loggers = {};
   this.analyzedRooms = {};
+
+  this.tasker = new Tasker(this);
 }
 
 // Do whatever is needed at the beginning of the tick
@@ -48,6 +49,7 @@ Overseer.prototype.getLogger = function(topic, roomName) {
 
 Overseer.prototype.getRoomAnalysis = function(roomName) {
   if (!this.analyzedRooms[roomName]) this.analyzedRooms[roomName] = new RoomAnalyzer(roomName);
+  this.analyzedRooms[roomName].analyzeRoom();
   return this.analyzedRooms[roomName];
 }
 

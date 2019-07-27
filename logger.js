@@ -21,11 +21,11 @@ const topics = {
   creep: {
     name: 'creep',
     color: colors.silver,
-  }
+  },
   tasker: {
     name: 'tasker',
     color: colors.silver,
-  }
+  },
 }
 
 const logLevels = {

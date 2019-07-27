@@ -1,9 +1,12 @@
 'use strict';
 
+const utils = require('utils');
+
 const RoomAnalyzer = function(roomName) {
   this.roomName = roomName;
   this.room = Game.rooms[this.roomName];
 
+  if (!Memory.rooms) Memory.rooms = {};
   if (!Memory.rooms[roomName]) Memory.rooms[roomName] = {};
   if (!Memory.rooms[roomName].RoomAnalysis) Memory.rooms[roomName].RoomAnalysis = {};
 
@@ -12,12 +15,11 @@ const RoomAnalyzer = function(roomName) {
 
 RoomAnalyzer.prototype.analyzeRoom = function() {
   this.room = Game.rooms[this.roomName];
-  if (this.room) return;
+  if (!this.room) return;
 
   this.getControllerInfo()
   this.getResourceInfo();
   this.getTerrainInfo();
-  this.getOtherObjectsInfo();
 
 }
 
@@ -27,8 +29,8 @@ RoomAnalyzer.prototype.getControllerInfo = function() {
     this.hasController = true;
     this.memory.owner = this.room.controller.owner.username;
     this.roomControlLevel = this.room.controller.level;
-    this.memory.ticksToDowngrade = room.controller.ticksToDowngrade;
-    this.memory.safemodeAvail = room.controller.safeModeAvailable;
+    this.memory.ticksToDowngrade = this.room.controller.ticksToDowngrade;
+    this.memory.safemodeAvail = this.room.controller.safeModeAvailable;
   } else {
     this.hasController = false;
     this.memory.owner = undefined;
@@ -48,8 +50,8 @@ RoomAnalyzer.prototype.getResourceInfo = function() {
   if (mineral) {
     this.memory.mineral = {
      id: mineral.id,
-     pos: utils.encodePosition(s.pos),
-     mineralType = mineral.mineralType,
+     pos: utils.encodePosition(mineral.pos),
+     mineralType: mineral.mineralType,
    };
   } else {
     this.memory.mineral = undefined;
@@ -65,12 +67,12 @@ RoomAnalyzer.prototype.getResourceInfo = function() {
   });
 
   this.memory.droppedResources = _.reduce(this.room.find(FIND_DROPPED_RESOURCES), (result, value, key) => {
-    (result[value.resourceType] || (result[value.resourceType] = [])).push{
-      pos = utils.encodePosition(value.pos)
+    (result[value.resourceType] || (result[value.resourceType] = [])).push({
+      pos: utils.encodePosition(value.pos),
       id: value.id,
       amount: value.amount,
       ticksToDecay: utils.calcResourceTTD(value.amount),
-    }
+    });
     return result;
   });
 
@@ -84,7 +86,7 @@ RoomAnalyzer.prototype.getTerrainInfo = function() {
     swamp: 0,
     wall: 0
   };
-  const terrain = new Room.Terrain(this.room.roomName);
+  const terrain = new Room.Terrain(this.room.name);
   for (let x = 0; x < 50; x++) {
     for (let y = 0; y < 50; y++) {
       let tile = terrain.get(x, y);
@@ -123,3 +125,5 @@ RoomAnalyzer.prototype.getCostMatrix = function() {
 
   return this.memory.CostMatrix;
 }
+
+module.exports = RoomAnalyzer;

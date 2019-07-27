@@ -1,36 +1,14 @@
+'use strict';
+
 const DecisionCase = require('decisionCase');
-
-
-// decisionTree
-const DTMiner = new DecisionCase(
-  true,
-  Array(
-    new DecisionCase(isEmpty(c), DTMinerEmpty),
-    new DecisionCase(true, DTMinerNotEmpty),
-  ),
-  storeMiningPosition
-);
-const DTMinerEmpty = new DecisionCase(
-  true,
-  Array(
-    new DecisionCase(isCloseEnoughToHarvest(c), actionHarvestEnergy),
-    new DecisionCase(true, actionMoveToSource),
-  )
-);
-const DTMinerNotEmpty = new DecisionCase(
-  true,
-  Array(
-    new DecisionCase(isCloseEnoughToTransfer(c), actionTransfer),
-    new DecisionCase(true, actionMoveToTransfer),
-  )
-);
+const utils = require('utils');
 
 // checks
 const once = (c) => {return true};
-const isEmpty = (c) => {c.carry.energy == 0};
-const isFull = (c) => {_.sum(c.carry) == c.carryCapacity};
+const isEmpty = (c) => {return c.carry.energy == 0};
+const isFull = (c) => {return _.sum(c.carry) == c.carryCapacity};
 const isWithinDistanceToTarget = (c, range) => {
-  const task = overseer.getTask(c);
+  const task = overseer.tasker.getTask(c);
   return c.pos.getRangeTo(task.target) <= range
 };
 const isCloseEnoughToHarvest = (c) => {isWithinDistanceToTarget(c, 1)};
@@ -38,24 +16,30 @@ const isCloseEnoughToTransfer = (c) => {isWithinDistanceToTarget(c, 1)};
 
 // store assigned spots to the memory - this will only be done once
 const storeMiningPosition = function(c) {
-  if (overseer.tasker.memory.miners[c.creepName]) return true;
+  if (!overseer.tasker.memory.miners) overseer.tasker.memory.miners = {};
+  if (overseer.tasker.memory.miners[c.name]) {
+    return true;
+  } else {
+    overseer.tasker.memory.miners[c.name] = {};
+  }
 
-  const sources = overseer.getRoomAnalysis(c.room.roomName).sources;
+  const sources = overseer.getRoomAnalysis(c.pos.roomName).memory.sources;
   _.each(sources, (s) => {
-    var sourcePos = utils.decodePosition(source.pos);
+    var sourcePos = utils.decodePosition(s.pos);
     var spotsAroundSource = sourcePos.getAdjacentEnterable();
 
-    var containers = source.pos.findInRange(FIND_STRUCTURES, 1, {
+    var containers = sourcePos.findInRange(FIND_STRUCTURES, 1, {
       filter: (s) => s.structureType == STRUCTURE_CONTAINER
     });
-    overseer.tasker.memory.miners[c.creepName].source = Game.getObjectById(source.id);
+
+    overseer.tasker.memory.miners[c.name].source = Game.getObjectById(s.id);
     if (containers.length > 0) {
       var container = containers[0];
-      coverseer.tasker.memory.miners[c.creepName].pos = container.pos;
-      overseer.tasker.memory.miners[c.creepName].container = container;
+      coverseer.tasker.memory.miners[c.name].pos = utils.encodePosition(container.pos);
+      overseer.tasker.memory.miners[c.name].container = container;
     } else {
-      overseer.tasker.memory.miners[c.creepName].pos = spotsAroundSource[0];
-      overseer.tasker.memory.miners[c.creepName].container = undefined;
+      overseer.tasker.memory.miners[c.name].pos = utils.encodePosition(spotsAroundSource[0]);
+      overseer.tasker.memory.miners[c.name].container = undefined;
     };
     return true;
   });
@@ -63,30 +47,30 @@ const storeMiningPosition = function(c) {
 };
 
 // Actions
-const actionTransfer(c) {
+const actionTransfer = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignTransfer(
-    target = overseer.tasker.memory.miners[c.creepName].container,
-    taskEndCondition = once,
+    overseer.tasker.memory.miners[c.name].container,
+    once,
   );
   overseer.tasker.setTask(task);
 };
 
-const actionHarvestEnergy(c) {
+const actionHarvestEnergy = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignHarvest(
-    target = overseer.tasker.memory.miners[c.creepName].source,
-    taskEndCondition = isFull,
+    overseer.tasker.memory.miners[c.name].source,
+    isFull,
   );
   overseer.tasker.setTask(task);
 };
 
-const actionMoveToSource(c) {
+const actionMoveToSource = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
-    target = overseer.tasker.memory.miners[c.creepName].pos,
-    taskEndCondition = isCloseEnoughToWithdraw,
-    taskOptions = {
+    utils.decodePosition(overseer.tasker.memory.miners[c.name].pos),
+    isCloseEnoughToHarvest,
+    {
       visualizePathStyle: {
         stroke: '#ffffff'
       },
@@ -95,12 +79,12 @@ const actionMoveToSource(c) {
   overseer.tasker.setTask(task);
 };
 
-const actionMoveToTransfer(c) {
-  let task = overseer.tasker.getNewTaskCreep(c);
+const actionMoveToTransfer = function(c) {
+  let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
-    target = overseer.tasker.memory.miners[c.creepName].pos,
-    taskEndCondition = isCloseEnoughToBuild,
-    taskOptions = {
+    utils.decodePosition(overseer.tasker.memory.miners[c.name].pos),
+    isCloseEnoughToTransfer,
+    {
       visualizePathStyle: {
         stroke: '#ffffff'
       },
@@ -108,5 +92,29 @@ const actionMoveToTransfer(c) {
   );
   overseer.tasker.setTask(task);
 };
+
+// decisionTree
+const DTMinerEmpty = new DecisionCase(
+  true,
+  Array(
+    new DecisionCase(isCloseEnoughToHarvest, actionHarvestEnergy),
+    new DecisionCase(true, actionMoveToSource),
+  )
+);
+const DTMinerNotEmpty = new DecisionCase(
+  true,
+  Array(
+    new DecisionCase(isCloseEnoughToTransfer, actionTransfer),
+    new DecisionCase(true, actionMoveToTransfer),
+  )
+);
+const DTMiner = new DecisionCase(
+  true,
+  Array(
+    new DecisionCase(isEmpty, DTMinerEmpty),
+    new DecisionCase(true, DTMinerNotEmpty),
+  ),
+  storeMiningPosition
+);
 
 module.exports = DTMiner;

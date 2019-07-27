@@ -1,36 +1,12 @@
+'use strict';
+
 const DecisionCase = require('decisionCase');
-
-
-// decisionTree
-const DTRepairer = new DecisionCase(
-  true,
-  Array(
-    new DecisionCase(isEmpty(c), DTRepairerEmpty),
-    new DecisionCase(true, DTRepairerNotEmpty),
-  )
-);
-const DTRepairerEmpty = new DecisionCase(
-  true,
-  Array(
-    new DecisionCase(isCloseEnoughToWithdraw(c), actionWithdrawEnergy),
-    new DecisionCase(true, actionMoveToGetEnergy),
-  ),
-  assignTargetWithdrawEnergy
-);
-const DTRepairerNotEmpty = new DecisionCase(
-  true,
-  Array(
-    new DecisionCase(isCloseEnoughToRepair(c), actionRepair),
-    new DecisionCase(true, actionMoveToRepair),
-  ),
-  assignTargetRepair
-);
 
 // checks
 const once = (c) => {return true};
-const isEmpty = (c) => {c.carry.energy == 0};
+const isEmpty = (c) => {return c.carry.energy == 0};
 const isWithinDistanceToTarget = (c, range) => {
-  const task = overseer.getTask(c);
+  const task = overseer.tasker.getTask(c);
   return c.pos.getRangeTo(task.target) <= range
 };
 const isCloseEnoughToRepair = (c) => {isWithinDistanceToTarget(c, 3)};
@@ -49,7 +25,7 @@ const assignTargetWithdrawEnergy = function(c) {
 };
 
 // Actions
-const actionRepair(c) {
+const actionRepair = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignRepair(
     target = task.target,
@@ -64,7 +40,7 @@ const actionRepair(c) {
   overseer.tasker.setTask(task);
 };
 
-const actionWithdrawEnergy(c) {
+const actionWithdrawEnergy = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignWithdaw(
     target = task.target,
@@ -75,7 +51,7 @@ const actionWithdrawEnergy(c) {
   overseer.tasker.setTask(task);
 };
 
-const actionMoveToGetEnergy(c) {
+const actionMoveToGetEnergy = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
     target = task.target,
@@ -89,8 +65,8 @@ const actionMoveToGetEnergy(c) {
   overseer.tasker.setTask(task);
 };
 
-const actionMoveToRepair(c) {
-  let task = overseer.tasker.getNewTaskCreep(c);
+const actionMoveToRepair = function(c) {
+  let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
     target = task.target,
     taskEndCondition = isCloseEnoughToRepair,
@@ -103,5 +79,29 @@ const actionMoveToRepair(c) {
   overseer.tasker.setTask(task);
 };
 
+// decisionTree
+const DTRepairerEmpty = new DecisionCase(
+  true,
+  Array(
+    new DecisionCase(isCloseEnoughToWithdraw, actionWithdrawEnergy),
+    new DecisionCase(true, actionMoveToGetEnergy),
+  ),
+  assignTargetWithdrawEnergy
+);
+const DTRepairerNotEmpty = new DecisionCase(
+  true,
+  Array(
+    new DecisionCase(isCloseEnoughToRepair, actionRepair),
+    new DecisionCase(true, actionMoveToRepair),
+  ),
+  assignTargetRepair
+);
+const DTRepairer = new DecisionCase(
+  true,
+  Array(
+    new DecisionCase(isEmpty, DTRepairerEmpty),
+    new DecisionCase(true, DTRepairerNotEmpty),
+  )
+);
 
 module.exports = DTRepairer;

@@ -7,17 +7,6 @@ Creep.prototype.initCreep = function() {
   if (!this.room.creepsByRole) this.room.creepsByRole = {};
   if (!this.room.creepsByRole[this.role]) this.room.creepsByRole[this.memory.role] = {};
   this.room.creepsByRole[this.memory.role][this.name] = this.id;
-
-  this.resetTasker();
-}
-
-Creep.prototype.resetTasker = function() {
-  this.memory.tasker = {
-    task: undefined,
-    targetID: undefined,
-    taskOptions: {},
-    taskCondition: undefined,
-  }
 }
 
 Creep.prototype.findSource = function() {
