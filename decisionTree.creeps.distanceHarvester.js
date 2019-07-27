@@ -3,15 +3,25 @@
 const DecisionCase = require('decisionCase');
 
 // checks
-const once = (c) => {return true};
-const isEmpty = (c) => {return c.carry.energy == 0};
-const isFull = (c) => {return _.sum(c.carry) == c.carryCapacity};
+const once = (c) => {
+  return true
+};
+const isEmpty = (c) => {
+  return c.carry.energy == 0
+};
+const isFull = (c) => {
+  return _.sum(c.carry) == c.carryCapacity
+};
 const isWithinDistanceToTarget = (c, range) => {
   const task = overseer.tasker.getTask(c);
   return c.pos.getRangeTo(task.target) <= range
 };
-const isCloseEnoughToHarvest = (c) => {isWithinDistanceToTarget(c, 1)};
-const isCloseEnoughToTransfer = (c) => {isWithinDistanceToTarget(c, 1)};
+const isCloseEnoughToHarvest = (c) => {
+  isWithinDistanceToTarget(c, 1)
+};
+const isCloseEnoughToTransfer = (c) => {
+  isWithinDistanceToTarget(c, 1)
+};
 
 //targetting
 const assignTargetTransfer = function(c) {

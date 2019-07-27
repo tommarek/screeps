@@ -3,14 +3,22 @@
 const DecisionCase = require('decisionCase');
 
 // checks
-const once = (c) => {return true};
-const isEmpty = (c) => {return c.carry.energy == 0};
+const once = (c) => {
+  return true
+};
+const isEmpty = (c) => {
+  return c.carry.energy == 0
+};
 const isWithinDistanceToTarget = (c, range) => {
   const task = overseer.tasker.getTask(c);
   return c.pos.getRangeTo(task.target) <= range
 };
-const isCloseEnoughToTransfer = (c) => {return isWithinDistanceToTarget(c, 1)};
-const isCloseEnoughToWithdraw = (c) => {return isWithinDistanceToTarget(c, 1)};
+const isCloseEnoughToTransfer = (c) => {
+  return isWithinDistanceToTarget(c, 1)
+};
+const isCloseEnoughToWithdraw = (c) => {
+  return isWithinDistanceToTarget(c, 1)
+};
 
 //targetting
 const assignTargetStore = function(c) {
@@ -51,8 +59,7 @@ const actionMoveToWithdraw = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
     task.target,
-    isCloseEnoughToWithdraw,
-    {
+    isCloseEnoughToWithdraw, {
       visualizePathStyle: {
         stroke: '#ffffff'
       },
@@ -66,8 +73,7 @@ const actionMoveToTransfer = function(c) {
   const target = task.target;
   task.assignMoveTo(
     target,
-    isCloseEnoughToTransfer,
-    {
+    isCloseEnoughToTransfer, {
       visualizePathStyle: {
         stroke: '#ffffff'
       },

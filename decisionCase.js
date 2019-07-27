@@ -11,7 +11,7 @@
  * @param {func} preHook
  *   Pre decision hook to be run before the evaluation process
  */
-const DecisionCase = function(predicate, action, preHook=undefined) {
+const DecisionCase = function(predicate, action, preHook = undefined) {
   this.predicate = predicate;
   this.action = action;
   this.preHook = preHook;

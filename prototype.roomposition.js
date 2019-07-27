@@ -1,8 +1,8 @@
-RoomPosition.prototype.isEnterable = function () {
+RoomPosition.prototype.isEnterable = function() {
   var atPos = this.look();
   var SWAMP = "swamp";
   var PLAIN = "plain";
-  for ( var i = 0 ; i < atPos.length ; i++ ) {
+  for (var i = 0; i < atPos.length; i++) {
     switch (atPos[i].type) {
       case LOOK_TERRAIN:
         if (atPos[i].terrain != PLAIN && atPos[i].terrain != SWAMP)
@@ -26,14 +26,14 @@ RoomPosition.prototype.isEnterable = function () {
   return true;
 }
 
-RoomPosition.prototype.getAdjacent = function () {
+RoomPosition.prototype.getAdjacent = function() {
   var ret = [];
   for (var i = -1; i < 2; i++) {
     for (var j = -1; j < 2; j++) {
       var x = this.x + i;
       var y = this.y + j;
       if (x >= 0 && x < 50 && y >= 0 && y < 50 && (x != this.x || y != this.y)) {
-        var newPos = new RoomPosition(x=x, y=y, roomName=this.roomName);
+        var newPos = new RoomPosition(x = x, y = y, roomName = this.roomName);
         ret.push(newPos);
       }
     }
@@ -46,7 +46,7 @@ RoomPosition.prototype.getAdjacentEnterable = function() {
   var ret = [];
   var adjacent = this.getAdjacent();
   for (var i in adjacent) {
-    if (adjacent[i].isEnterable()){
+    if (adjacent[i].isEnterable()) {
       ret.push(adjacent[i]);
     }
   }

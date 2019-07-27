@@ -9,8 +9,8 @@ const ProcessInit = function(params) {
 ProcessInit.prototype = Object.create(Process.prototype);
 
 ProcessInit.prototype.run = function() {
-    Game.creepsByRole = {};
-    _.each(Game.creeps, creep => creep.initCreep());
+  Game.creepsByRole = {};
+  _.each(Game.creeps, creep => creep.initCreep());
 }
 
 module.exports = ProcessInit;

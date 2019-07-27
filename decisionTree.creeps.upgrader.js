@@ -3,14 +3,22 @@
 const DecisionCase = require('decisionCase');
 
 // checks
-const once = (c) => {return true};
-const isEmpty = (c) => {return c.carry.energy == 0};
+const once = (c) => {
+  return true
+};
+const isEmpty = (c) => {
+  return c.carry.energy == 0
+};
 const isWithinDistanceToTarget = (c, range) => {
   const task = overseer.tasker.getTask(c);
   return c.pos.getRangeTo(task.target) <= range
 };
-const isCloseEnoughToUpgrade = (c) => {return isWithinDistanceToTarget(c, 3)};
-const isCloseEnoughToWithdraw = (c) => {return isWithinDistanceToTarget(c, 1)};
+const isCloseEnoughToUpgrade = (c) => {
+  return isWithinDistanceToTarget(c, 3)
+};
+const isCloseEnoughToWithdraw = (c) => {
+  return isWithinDistanceToTarget(c, 1)
+};
 
 //targetting
 const assignTargetUpgrade = function(c) {
@@ -49,8 +57,7 @@ const actionMoveToGetEnergy = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
     task.target,
-    isCloseEnoughToWithdraw,
-    {
+    isCloseEnoughToWithdraw, {
       visualizePathStyle: {
         stroke: '#ffffff'
       },
@@ -63,8 +70,7 @@ const actionMoveToUpgrade = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
     task.target,
-    isCloseEnoughToUpgrade,
-    {
+    isCloseEnoughToUpgrade, {
       visualizePathStyle: {
         stroke: '#ffffff'
       },

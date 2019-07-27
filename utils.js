@@ -21,9 +21,9 @@ const utils = {
     return destination;
   },
 
-  calcResourceTTD: function(amount, ticks=0)  {
-    const newAmount = ceil(amount/1000);
-    if (newAmount >= 1) return this.calcTicksToDecay(ticks+1, newAmount);
+  calcResourceTTD: function(amount, ticks = 0) {
+    const newAmount = ceil(amount / 1000);
+    if (newAmount >= 1) return this.calcTicksToDecay(ticks + 1, newAmount);
     return newAmount;
   }
 }

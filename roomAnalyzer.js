@@ -49,10 +49,10 @@ RoomAnalyzer.prototype.getResourceInfo = function() {
   const mineral = _.first(this.room.find(FIND_MINERALS));
   if (mineral) {
     this.memory.mineral = {
-     id: mineral.id,
-     pos: utils.encodePosition(mineral.pos),
-     mineralType: mineral.mineralType,
-   };
+      id: mineral.id,
+      pos: utils.encodePosition(mineral.pos),
+      mineralType: mineral.mineralType,
+    };
   } else {
     this.memory.mineral = undefined;
   }

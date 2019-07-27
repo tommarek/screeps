@@ -10,7 +10,7 @@ StructureSpawn.prototype.createCustomCreep = function(body, name, memory) {
   }
 };
 
-StructureSpawn.prototype.genBody = function(repeating=[], fixed=[], costLimit=this.room.energyAvailable) {
+StructureSpawn.prototype.genBody = function(repeating = [], fixed = [], costLimit = this.room.energyAvailable) {
   let body = [];
 
   let fixedBodyPrice = 0;
@@ -30,9 +30,9 @@ StructureSpawn.prototype.genBody = function(repeating=[], fixed=[], costLimit=th
 
     var repeated = remainingEnergy / repeatingBodyPrice;
     for (let i = 0; i < repeated - 1; i++) {
-        for (let j = 0; j < repeating.length; j++){
-            body.push(repeating[j]);
-        }
+      for (let j = 0; j < repeating.length; j++) {
+        body.push(repeating[j]);
+      }
     }
   }
 

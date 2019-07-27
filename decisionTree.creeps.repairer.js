@@ -3,14 +3,22 @@
 const DecisionCase = require('decisionCase');
 
 // checks
-const once = (c) => {return true};
-const isEmpty = (c) => {return c.carry.energy == 0};
+const once = (c) => {
+  return true
+};
+const isEmpty = (c) => {
+  return c.carry.energy == 0
+};
 const isWithinDistanceToTarget = (c, range) => {
   const task = overseer.tasker.getTask(c);
   return c.pos.getRangeTo(task.target) <= range
 };
-const isCloseEnoughToRepair = (c) => {isWithinDistanceToTarget(c, 3)};
-const isCloseEnoughToWithdraw = (c) => {isWithinDistanceToTarget(c, 1)};
+const isCloseEnoughToRepair = (c) => {
+  isWithinDistanceToTarget(c, 3)
+};
+const isCloseEnoughToWithdraw = (c) => {
+  isWithinDistanceToTarget(c, 1)
+};
 
 //targetting
 const assignTargetRepair = function(c) {

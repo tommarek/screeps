@@ -4,15 +4,25 @@ const DecisionCase = require('decisionCase');
 const utils = require('utils');
 
 // checks
-const once = (c) => {return true};
-const isEmpty = (c) => {return c.carry.energy == 0};
-const isFull = (c) => {return _.sum(c.carry) == c.carryCapacity};
+const once = (c) => {
+  return true
+};
+const isEmpty = (c) => {
+  return c.carry.energy == 0
+};
+const isFull = (c) => {
+  return _.sum(c.carry) == c.carryCapacity
+};
 const isWithinDistanceToTarget = (c, range) => {
   const task = overseer.tasker.getTask(c);
   return c.pos.getRangeTo(task.target) <= range
 };
-const isCloseEnoughToHarvest = (c) => {isWithinDistanceToTarget(c, 1)};
-const isCloseEnoughToTransfer = (c) => {isWithinDistanceToTarget(c, 1)};
+const isCloseEnoughToHarvest = (c) => {
+  isWithinDistanceToTarget(c, 1)
+};
+const isCloseEnoughToTransfer = (c) => {
+  isWithinDistanceToTarget(c, 1)
+};
 
 // store assigned spots to the memory - this will only be done once
 const storeMiningPosition = function(c) {
@@ -69,8 +79,7 @@ const actionMoveToSource = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
     utils.decodePosition(overseer.tasker.memory.miners[c.name].pos),
-    isCloseEnoughToHarvest,
-    {
+    isCloseEnoughToHarvest, {
       visualizePathStyle: {
         stroke: '#ffffff'
       },
@@ -83,8 +92,7 @@ const actionMoveToTransfer = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
     utils.decodePosition(overseer.tasker.memory.miners[c.name].pos),
-    isCloseEnoughToTransfer,
-    {
+    isCloseEnoughToTransfer, {
       visualizePathStyle: {
         stroke: '#ffffff'
       },

@@ -3,14 +3,22 @@
 const DecisionCase = require('decisionCase');
 
 // checks
-const once = function(c) {return true};
-const isEmpty = function(c) {return c.carry.energy == 0};
+const once = function(c) {
+  return true
+};
+const isEmpty = function(c) {
+  return c.carry.energy == 0
+};
 const isWithinDistanceToTarget = function(c, range) {
   const task = overseer.tasker.getTask(c);
   return c.pos.getRangeTo(task.target) <= range
 };
-const isCloseEnoughToBuild = function(c) {return isWithinDistanceToTarget(c, 3)};
-const isCloseEnoughToWithdraw = function(c) {return isWithinDistanceToTarget(c, 1)};
+const isCloseEnoughToBuild = function(c) {
+  return isWithinDistanceToTarget(c, 3)
+};
+const isCloseEnoughToWithdraw = function(c) {
+  return isWithinDistanceToTarget(c, 1)
+};
 
 //targetting
 const assignTargetBuild = function(c) {
@@ -55,8 +63,7 @@ const actionMoveToGetEnergy = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
     task.target,
-    isCloseEnoughToWithdraw,
-    {
+    isCloseEnoughToWithdraw, {
       visualizePathStyle: {
         stroke: '#ffffff'
       },
@@ -69,8 +76,7 @@ const actionMoveToBuild = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
     task.target,
-    isCloseEnoughToBuild,
-    {
+    isCloseEnoughToBuild, {
       visualizePathStyle: {
         stroke: '#ffffff'
       },

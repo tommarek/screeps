@@ -9,23 +9,25 @@ const Task = function(object, task = undefined, taskOptions = undefined, target,
 }
 
 Task.prototype.execute = function() {
-  if (!this.task) return undefined;
-  overseer.tasker.logger.debug('EXECUTING creep '+ this.object.name + ', task: ' + this.task + ' target: ' + this.target);
+  if (!this.task || !this.object) return null;
+  this.refreshObject();
   this.lastReturn = this[this.task]();
+  overseer.tasker.logger.debug('EXECUTING creep ' + this.object.name + ', task: ' + this.task + ' target: ' + this.target + ' ret: ' + this.lastReturn);
   return this.lastReturn;
 }
 
 Task.prototype.taskEnded = function() {
-    if (this.taskEndCondition === undefined) return undefined;
-    return this.taskEndCondition(this.object)
+  this.refreshObject();
+  if (this.taskEndCondition === undefined) return true;
+  return this.taskEndCondition(this.object)
 };
 
 Task.prototype.refreshObject = function() {
-    this.object = Game.getObjectById(this.object.id);
+  this.object = Game.getObjectById(this.object.id);
 }
 
 Task.prototype.assignTarget = function(target) {
-    this.target = target
+  this.target = target
 }
 
 Task.prototype.build = function() {
@@ -47,7 +49,7 @@ Task.prototype.assignHarvest = function(target, taskEndCondition) {
 };
 
 Task.prototype.moveTo = function() {
-  this.object.moveTo(this.target, this.taskOptions);
+  return this.object.moveTo(this.target, this.taskOptions);
 };
 Task.prototype.assignMoveTo = function(target, taskEndCondition, taskOptions = {}) {
   this.task = 'moveTo';
@@ -95,7 +97,6 @@ Task.prototype.assignWithdaw = function(target, taskEndCondition, resourceType, 
   this.resourceType = resourceType;
   this.amount = amount;
 };
-
 
 
 module.exports = Task;
