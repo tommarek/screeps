@@ -1,6 +1,6 @@
 'use strict';
 
-const Process = require('./process');
+const Process = require('./process.process');
 
 const ProcessInit = function(params) {
   Process.call(params);

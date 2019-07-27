@@ -1,7 +1,7 @@
 'use strict';
 
-const Process = require('./process');
-const DTCreeps = require('decisionTree.creeps')
+const Process = require('./process.process');
+const DTCreeps = require('decisionTree.creeps.creeps')
 
 const ProcessTasker = function(params) {
   Process.call(params);
