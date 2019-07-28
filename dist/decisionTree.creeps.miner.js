@@ -15,13 +15,18 @@ const isFull = (c) => {
 };
 const isWithinDistanceToTarget = (c, range) => {
   const task = overseer.tasker.getTask(c);
-  return c.pos.getRangeTo(task.target) <= range
+  console.log('target: ' + task.target + ' range = ' + c.pos.getRangeTo(task.target));
+  return c.pos.getRangeTo(task.target) <= range;
 };
 const isCloseEnoughToHarvest = (c) => {
-  isWithinDistanceToTarget(c, 1)
+  const ret =  isWithinDistanceToTarget(c, 1);
+  console.log('is close enough to harvest: ' + ret);
+  return ret;
 };
 const isCloseEnoughToTransfer = (c) => {
-  isWithinDistanceToTarget(c, 1)
+  const ret =  isWithinDistanceToTarget(c, 1);
+  console.log('is close enough to harvest: ' + ret);
+  return ret;
 };
 
 // store assigned spots to the memory - this will only be done once
@@ -45,7 +50,7 @@ const storeMiningPosition = function(c) {
     overseer.tasker.memory.miners[c.name].source = Game.getObjectById(s.id);
     if (containers.length > 0) {
       var container = containers[0];
-      coverseer.tasker.memory.miners[c.name].pos = utils.encodePosition(container.pos);
+      overseer.tasker.memory.miners[c.name].pos = utils.encodePosition(container.pos);
       overseer.tasker.memory.miners[c.name].container = container;
     } else {
       overseer.tasker.memory.miners[c.name].pos = utils.encodePosition(spotsAroundSource[0]);
@@ -56,12 +61,25 @@ const storeMiningPosition = function(c) {
   return false;
 };
 
+const assignHarvestTarget = function(c) {
+  let task = overseer.tasker.getTask(c);
+  task.assignTarget(overseer.tasker.memory.miners[c.name].source);
+  overseer.tasker.setTask(task);
+}
+
+const assignTransferTarget = function(c) {
+  let task = overseer.tasker.getTask(c);
+  task.assignTarget(overseer.tasker.memory.miners[c.name].container);
+  overseer.tasker.setTask(task);
+}
+
 // Actions
 const actionTransfer = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignTransfer(
     overseer.tasker.memory.miners[c.name].container,
     once,
+    RESOURCE_ENERGY
   );
   overseer.tasker.setTask(task);
 };
@@ -107,14 +125,16 @@ const DTMinerEmpty = new DecisionCase(
   Array(
     new DecisionCase(isCloseEnoughToHarvest, actionHarvestEnergy),
     new DecisionCase(true, actionMoveToSource),
-  )
+  ),
+  assignHarvestTarget
 );
 const DTMinerNotEmpty = new DecisionCase(
   true,
   Array(
     new DecisionCase(isCloseEnoughToTransfer, actionTransfer),
     new DecisionCase(true, actionMoveToTransfer),
-  )
+  ),
+  assignTransferTarget
 );
 const DTMiner = new DecisionCase(
   true,

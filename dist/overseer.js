@@ -2,8 +2,8 @@
 
 const Logger = require('logger');
 const RoomAnalyzer = require('roomAnalyzer');
-const Tasker = require('tasker');
-
+const Mining = require('overseer.mining');
+const Tasker = require('overseer.tasker');
 
 //TODO: timing of processess
 const Overseer = function() {
@@ -11,6 +11,7 @@ const Overseer = function() {
   this.loggers = {};
   this.analyzedRooms = {};
 
+  this.mining = new Mining(this);
   this.tasker = new Tasker(this);
 }
 

@@ -22,7 +22,7 @@ ProcessTasker.prototype.executeAssignedTasks = function() {
   overseer.tasker.logger.debug('unassigned creeps :' + JSON.stringify(overseer.tasker.getCreepNamesUnassigned()));
   if (assigned.length == 0) return;
   _.each(overseer.tasker.assignedTasks, (task, creepName) => {
-    if (task == undefined || !task.object) {
+    if (task === undefined && creepName in Game.creeps) {
       overseer.tasker.moveCreepToUnassigned(creepName);
     } else {
       const ret = task.execute();

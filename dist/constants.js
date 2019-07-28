@@ -68,10 +68,10 @@ const constants = {
       }
     },
     miner: {
-      required: 0,
+      required: 1,
       body: {
         repeating: [WORK],
-        fixed: [CARRY, MOVE, MOVE, MOVE]
+        fixed: [WORK, CARRY, MOVE, MOVE, MOVE]
       }
     },
     // dumptruck: {
