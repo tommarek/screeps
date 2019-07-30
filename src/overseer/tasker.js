@@ -1,6 +1,6 @@
 'use strict';
 
-const Task = require('task');
+const Task = require('overseer.task');
 
 const Tasker = function(o) {
   this.unassignedCreeps = new Set([]);

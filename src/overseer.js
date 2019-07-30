@@ -2,7 +2,7 @@
 
 const Logger = require('logger');
 const RoomAnalyzer = require('roomAnalyzer');
-const Tasker = require('tasker');
+const Tasker = require('overseer.tasker');
 
 
 //TODO: timing of processess
