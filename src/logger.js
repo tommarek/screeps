@@ -26,6 +26,10 @@ const topics = {
     name: 'tasker',
     color: colors.silver,
   },
+  builder: {
+    name: 'builder',
+    color: colors.silver,
+  },
 }
 
 const logLevels = {

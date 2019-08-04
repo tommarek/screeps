@@ -20,6 +20,7 @@ const constants = {
 
   processes: {
     INIT: 'process.init',
+    BUILDER: 'process.builder',
     TASKER: 'process.tasker',
   },
 

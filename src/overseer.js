@@ -1,7 +1,10 @@
 'use strict';
 
 const Logger = require('logger');
+
 const RoomAnalyzer = require('roomAnalyzer');
+
+const Builder = require('overseer.builder');
 const Tasker = require('overseer.tasker');
 
 
@@ -11,6 +14,7 @@ const Overseer = function() {
   this.loggers = {};
   this.analyzedRooms = {};
 
+  this.builder = new Builder(this);
   this.tasker = new Tasker(this);
 }
 
