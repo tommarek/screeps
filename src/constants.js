@@ -21,6 +21,7 @@ const constants = {
   processes: {
     INIT: 'process.init',
     BUILDER: 'process.builder',
+    MINER: 'process.miner',
     TASKER: 'process.tasker',
   },
 

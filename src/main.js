@@ -9,7 +9,7 @@ var constants = require('constants');
 
 const Overseer = require('overseer');
 global.overseer = new Overseer();
-
+overseer.init()
 
 module.exports = {
   loop() {
@@ -24,6 +24,8 @@ module.exports = {
 
     overseer.runProcess(constants.processes.INIT, {});
     overseer.runProcess(constants.processes.TASKER, {});
+    overseer.runProcess(constants.processes.MINER, {});
+    overseer.runProcess(constants.processes.BUILDER, {});
 
     // OLD stuff
 

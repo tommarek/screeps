@@ -28,6 +28,7 @@ RoomAnalyzer.prototype.getControllerInfo = function() {
   if (controller) {
     this.hasController = true;
     this.memory.owner = this.room.controller.owner.username;
+    this.my = this.room.controller.my;
     this.roomControlLevel = this.room.controller.level;
     this.memory.ticksToDowngrade = this.room.controller.ticksToDowngrade;
     this.memory.safemodeAvail = this.room.controller.safeModeAvailable;

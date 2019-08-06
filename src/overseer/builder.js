@@ -8,6 +8,7 @@ const Builder = function(o) {
 
   this.logger = o.getLogger('builder');
 }
+
 /**
  * Flag creation takes two steps - first the flag is crated in a room we can see
  * afterwards in the next tick the flag can be moved anywhere on a map. Weird...
@@ -22,7 +23,7 @@ const Builder = function(o) {
  **/
 Builder.prototype.createFlag = function(pos, name, color, secondaryColor = undefined) {
   const room = Game.rooms[Object.keys(Game.rooms)[0]];
-  room.createFlag(1,1,name, color, secondaryColor);
+  room.createFlag(1, 1, name, color, secondaryColor);
   this.flagsToMove[name] = pos;
 }
 
@@ -31,11 +32,10 @@ Builder.prototype.createFlag = function(pos, name, color, secondaryColor = undef
  * desired location
  **/
 Builder.prototype.moveFlags = function() {
-  _.each(this.flagsToMove, (pos, flagName) => {
-    const flag = Game.flags[name];
-    flag.setPosition(pos);
-    delete this.flagsToMove[flagName];
-  }
+  _.each(overseer.builder.flagsToMove, (pos, flagName) => {
+    Game.flags[flagName].setPosition(pos);
+    delete overseer.builder.flagsToMove[flagName];
+  });
 }
 
 /**
@@ -65,7 +65,7 @@ Builder.prototype.build = function() {
  * @param {String} name
  *   the name of the structure, for structures that support it (currently only spawns).
  **/
-Builder.prototype.buildStructure = function(pos, structureType, name=undefined) {
+Builder.prototype.buildStructure = function(pos, structureType, name = undefined) {
   roomName = pos.roomName
   if (!this.buildQueue[roomName]) this.buildQueue[roomName] = [];
 

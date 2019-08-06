@@ -6,15 +6,25 @@ const RoomAnalyzer = require('roomAnalyzer');
 
 const Builder = require('overseer.builder');
 const Tasker = require('overseer.tasker');
+const Miner = require('overseer.miner');
 
 
 //TODO: timing of processess
 const Overseer = function() {
   if (!Memory.overseer) Memory.overseer = {};
+  this.ticks = 0;
+
   this.loggers = {};
   this.analyzedRooms = {};
 
+  this.builder = undefined;
+  this.miner = undefined;
+  this.tasker = undefined;
+}
+
+Overseer.prototype.init = function() {
   this.builder = new Builder(this);
+  this.miner = new Miner(this);
   this.tasker = new Tasker(this);
 }
 
@@ -24,6 +34,7 @@ Overseer.prototype.initTick = function(options = {}) {
   this.analyzedRooms = {};
   this.tasker.queue = [];
   this.currentProcess = null;
+  this.ticks += 1;
 }
 
 Overseer.prototype.runProcess = function(processFile, options) {

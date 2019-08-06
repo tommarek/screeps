@@ -30,6 +30,10 @@ const topics = {
     name: 'builder',
     color: colors.silver,
   },
+  miner: {
+    name: 'miner',
+    color: colors.silver,
+  },
 }
 
 const logLevels = {
