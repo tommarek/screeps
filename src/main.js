@@ -41,7 +41,7 @@ module.exports = {
           var newName = roleName + Game.time;
           let available_spawn = room.getAvailableSpawn();
           if (available_spawn) {
-            let newBody = available_spawn.genBody(roleDetails.body.repeating, roleDetails.body.fixed, 300)
+            let newBody = available_spawn.genBody(roleDetails.body.repeating, roleDetails.body.fixed, 900)
             logger.info('Spawning new ' + roleName + ': ' + newName + 'body: ' + newBody);
             var exitCode = available_spawn.spawnCreep(newBody, newName, {
               memory: {
@@ -96,6 +96,7 @@ module.exports = {
       if (!Game.creeps[name]) {
         delete Memory.creeps[name];
         overseer.tasker.clearCreep(name);
+        overseer.miner.clearCreep(name);
         console.log('Clearing non-existing creep memory:', name);
       }
     }

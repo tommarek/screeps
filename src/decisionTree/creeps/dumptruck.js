@@ -1,6 +1,7 @@
 'use strict';
 
 const DecisionCase = require('decisionCase');
+const utils = require('utils');
 
 // checks
 const once = (c) => {
@@ -9,48 +10,55 @@ const once = (c) => {
 const isEmpty = (c) => {
   return c.carry.energy == 0
 };
+const isFull = (c) => {
+  return _.sum(c.carry) == c.carryCapacity
+};
 const isWithinDistanceToTarget = (c, range) => {
   const task = overseer.tasker.getTask(c);
   return c.pos.getRangeTo(task.target) <= range
 };
-const isCloseEnoughToTransfer = (c) => {
-  return isWithinDistanceToTarget(c, 1)
-};
 const isCloseEnoughToWithdraw = (c) => {
   return isWithinDistanceToTarget(c, 1)
 };
+const isCloseEnoughToTransfer = (c) => {
+  return isWithinDistanceToTarget(c, 1)
+};
+const isOnTargetLocation = (c) => {
+  return isWithinDistanceToTarget(c, 0)
+}
 
 //targetting
-const assignTargetStore = function(c) {
+const assignTargetWithdraw = function(c) {
   let task = overseer.tasker.getTask(c);
-  task.assignTarget(c.findTransferTarget());
+  const target = overseer.miner.getDumpTruckTarget(c.name);
+  task.assignTarget(target.container);
   overseer.tasker.setTask(task);
 };
-const assignTargetWithdrawEnergy = function(c) {
+
+const assignTargetTransfer = function(c) {
   let task = overseer.tasker.getTask(c);
-  task.assignTarget(c.findStorage());
+  const target = overseer.miner.getDumpTruckTarget(c.name);
+  task.assignTarget(c.room.storage);
   overseer.tasker.setTask(task);
 };
 
 // Actions
-const actionTransfer = function(c) {
+const actionWithdraw = function(c) {
   let task = overseer.tasker.getTask(c);
-  task.assignTransfer(
+  task.assignWithdraw(
     task.target,
-    isEmpty,
-    RESOURCE_ENERGY,
-    c.carryCapacity,
+    isFull,
+    RESOURCE_ENERGY
   );
   overseer.tasker.setTask(task);
 };
 
-const actionWithdrawEnergy = function(c) {
+const actionTransfer = function(c) {
   let task = overseer.tasker.getTask(c);
-  task.assignWithdraw(
+  task.assignTransfer(
     task.target,
     once,
-    RESOURCE_ENERGY,
-    c.carryCapacity,
+    RESOURCE_ENERGY
   );
   overseer.tasker.setTask(task);
 };
@@ -63,48 +71,47 @@ const actionMoveToWithdraw = function(c) {
       visualizePathStyle: {
         stroke: '#ffffff'
       },
-    },
+    }
   );
   overseer.tasker.setTask(task);
 };
 
 const actionMoveToTransfer = function(c) {
   let task = overseer.tasker.getTask(c);
-  const target = task.target;
   task.assignMoveTo(
-    target,
+    task.target,
     isCloseEnoughToTransfer, {
       visualizePathStyle: {
         stroke: '#ffffff'
       },
-    },
+    }
   );
   overseer.tasker.setTask(task);
 };
 
 // decisionTree
-const DTHaulerEmpty = new DecisionCase(
+const DTDumpTruckEmpty = new DecisionCase(
   true,
   Array(
-    new DecisionCase(isCloseEnoughToWithdraw, actionWithdrawEnergy),
+    new DecisionCase(isCloseEnoughToWithdraw, actionWithdraw),
     new DecisionCase(true, actionMoveToWithdraw),
   ),
-  assignTargetWithdrawEnergy
+  assignTargetWithdraw
 );
-const DTHaulerNotEmpty = new DecisionCase(
+const DTDumpTruckNotEmpty = new DecisionCase(
   true,
   Array(
     new DecisionCase(isCloseEnoughToTransfer, actionTransfer),
     new DecisionCase(true, actionMoveToTransfer),
   ),
-  assignTargetStore
+  assignTargetTransfer
 );
-const DTHauler = new DecisionCase(
+const DTDumpTruck = new DecisionCase(
   true,
   Array(
-    new DecisionCase(isEmpty, DTHaulerEmpty),
-    new DecisionCase(true, DTHaulerNotEmpty),
-  )
+    new DecisionCase(isEmpty, DTDumpTruckEmpty),
+    new DecisionCase(true, DTDumpTruckNotEmpty),
+  ),
 );
 
-module.exports = DTHauler;
+module.exports = DTDumpTruck;

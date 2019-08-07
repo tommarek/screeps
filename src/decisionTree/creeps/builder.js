@@ -50,7 +50,7 @@ const actionBuild = function(c) {
 
 const actionWithdrawEnergy = function(c) {
   let task = overseer.tasker.getTask(c);
-  task.assignWithdaw(
+  task.assignWithdraw(
     task.target,
     once,
     RESOURCE_ENERGY,

@@ -70,19 +70,19 @@ const constants = {
       }
     },
     miner: {
-      required: 0,
+      required: 2,
       body: {
         repeating: [WORK],
-        fixed: [CARRY, MOVE, MOVE, MOVE]
+        fixed: [CARRY, WORK, MOVE, MOVE, MOVE]
       }
     },
-    // dumptruck: {
-    //   required: 2,
-    //   body: {
-    //     repeating: [CARRY, CARRY, MOVE],
-    //     fixed: [WORK, CARRY, MOVE]
-    //   }
-    // },
+    dumptruck: {
+      required: 2,
+      body: {
+        repeating: [CARRY, CARRY, MOVE],
+        fixed: [WORK, CARRY, MOVE]
+      }
+    },
   },
 
   repairThreshold: 0.8,

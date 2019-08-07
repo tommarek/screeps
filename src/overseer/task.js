@@ -70,7 +70,7 @@ Task.prototype.assignRepair = function(target, taskEndCondition) {
 Task.prototype.transfer = function() {
   return this.object.transfer(this.target, this.resourceType, this.amount)
 };
-Task.prototype.assignTransfer = function(target, taskEndCondition, resourceType, amount) {
+Task.prototype.assignTransfer = function(target, taskEndCondition, resourceType, amount = undefined) {
   this.task = 'transfer';
   this.target = target;
   this.taskEndCondition = taskEndCondition;
@@ -90,7 +90,7 @@ Task.prototype.assignUpgrade = function(target, taskEndCondition) {
 Task.prototype.withdraw = function() {
   return this.object.withdraw(this.target, this.resourceType, this.amount)
 };
-Task.prototype.assignWithdaw = function(target, taskEndCondition, resourceType, amount) {
+Task.prototype.assignWithdraw = function(target, taskEndCondition, resourceType, amount = undefined) {
   this.task = 'withdraw';
   this.target = target;
   this.taskEndCondition = taskEndCondition;

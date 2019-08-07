@@ -18,58 +18,46 @@ const isWithinDistanceToTarget = (c, range) => {
   return c.pos.getRangeTo(task.target) <= range
 };
 const isCloseEnoughToHarvest = (c) => {
-  isWithinDistanceToTarget(c, 1)
+  return isWithinDistanceToTarget(c, 1)
 };
 const isCloseEnoughToTransfer = (c) => {
-  isWithinDistanceToTarget(c, 1)
+  return isWithinDistanceToTarget(c, 1)
+};
+const isOnTargetLocation = (c) => {
+  return isWithinDistanceToTarget(c, 0)
+}
+//targetting
+const assignTargetHarvest = function(c) {
+  let task = overseer.tasker.getTask(c);
+  const target = overseer.miner.getMinerTarget(c.name);
+  task.assignTarget(target.source);
+  overseer.tasker.setTask(task);
 };
 
-// store assigned spots to the memory - this will only be done once
-const storeMiningPosition = function(c) {
-  if (!overseer.tasker.memory.miners) overseer.tasker.memory.miners = {};
-  if (overseer.tasker.memory.miners[c.name]) {
-    return true;
-  } else {
-    overseer.tasker.memory.miners[c.name] = {};
-  }
-
-  const sources = overseer.getRoomAnalysis(c.pos.roomName).memory.sources;
-  _.each(sources, (s) => {
-    var sourcePos = utils.decodePosition(s.pos);
-    var spotsAroundSource = sourcePos.getAdjacentEnterable();
-
-    var containers = sourcePos.findInRange(FIND_STRUCTURES, 1, {
-      filter: (s) => s.structureType == STRUCTURE_CONTAINER
-    });
-
-    overseer.tasker.memory.miners[c.name].source = Game.getObjectById(s.id);
-    if (containers.length > 0) {
-      var container = containers[0];
-      coverseer.tasker.memory.miners[c.name].pos = utils.encodePosition(container.pos);
-      overseer.tasker.memory.miners[c.name].container = container;
-    } else {
-      overseer.tasker.memory.miners[c.name].pos = utils.encodePosition(spotsAroundSource[0]);
-      overseer.tasker.memory.miners[c.name].container = undefined;
-    };
-    return true;
-  });
-  return false;
+const assignTargetTransfer = function(c) {
+  let task = overseer.tasker.getTask(c);
+  const target = overseer.miner.getMinerTarget(c.name);
+  task.assignTarget(target.container);
+  overseer.tasker.setTask(task);
 };
 
 // Actions
 const actionTransfer = function(c) {
   let task = overseer.tasker.getTask(c);
+  const target = overseer.miner.getMinerTarget(c.name);
   task.assignTransfer(
-    overseer.tasker.memory.miners[c.name].container,
+    target.container,
     once,
+    RESOURCE_ENERGY
   );
   overseer.tasker.setTask(task);
 };
 
 const actionHarvestEnergy = function(c) {
   let task = overseer.tasker.getTask(c);
+  const target = overseer.miner.getMinerTarget(c.name);
   task.assignHarvest(
-    overseer.tasker.memory.miners[c.name].source,
+    target.source,
     isFull,
   );
   overseer.tasker.setTask(task);
@@ -77,9 +65,10 @@ const actionHarvestEnergy = function(c) {
 
 const actionMoveToSource = function(c) {
   let task = overseer.tasker.getTask(c);
+  const target = overseer.miner.getMinerTarget(c.name);
   task.assignMoveTo(
-    utils.decodePosition(overseer.tasker.memory.miners[c.name].pos),
-    isCloseEnoughToHarvest, {
+    target.miningPos,
+    isOnTargetLocation, {
       visualizePathStyle: {
         stroke: '#ffffff'
       },
@@ -90,9 +79,10 @@ const actionMoveToSource = function(c) {
 
 const actionMoveToTransfer = function(c) {
   let task = overseer.tasker.getTask(c);
+  const target = overseer.miner.getMinerTarget(c.name);
   task.assignMoveTo(
-    utils.decodePosition(overseer.tasker.memory.miners[c.name].pos),
-    isCloseEnoughToTransfer, {
+    target.miningPos,
+    isOnTargetLocation, {
       visualizePathStyle: {
         stroke: '#ffffff'
       },
@@ -107,14 +97,16 @@ const DTMinerEmpty = new DecisionCase(
   Array(
     new DecisionCase(isCloseEnoughToHarvest, actionHarvestEnergy),
     new DecisionCase(true, actionMoveToSource),
-  )
+  ),
+  assignTargetHarvest
 );
 const DTMinerNotEmpty = new DecisionCase(
   true,
   Array(
     new DecisionCase(isCloseEnoughToTransfer, actionTransfer),
     new DecisionCase(true, actionMoveToTransfer),
-  )
+  ),
+  assignTargetTransfer
 );
 const DTMiner = new DecisionCase(
   true,
@@ -122,7 +114,6 @@ const DTMiner = new DecisionCase(
     new DecisionCase(isEmpty, DTMinerEmpty),
     new DecisionCase(true, DTMinerNotEmpty),
   ),
-  storeMiningPosition
 );
 
 module.exports = DTMiner;

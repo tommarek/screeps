@@ -3,8 +3,9 @@
 const utils = require('utils');
 
 const Miner = function(o) {
-  this.locationDetails = {}
-  this.assignments = {} // {flagName: {miner: miner_name, dumpTruck: dumpTruckName}}
+  this.locationDetails = {};
+  this.assignedMiners = {};
+  this.assignedDumpTrucks = {};
 
   this.logger = o.getLogger('miner');
 
@@ -19,13 +20,7 @@ const Miner = function(o) {
  **/
 Miner.prototype.initFlags = function() {
   const miningFlags = this.getMiningFlags();
-  _.each(miningFlags, (flag) => {
-    this.loadLocationDetails(flag);
-    this.assignments[flag.name] = {
-      miner: undefined,
-      dumpTruck: undefined
-    };
-  });
+  _.each(miningFlags, (flag) => {this.loadLocationDetails(flag)});
 };
 
 /**
@@ -83,16 +78,63 @@ Miner.prototype.placeMiningFlags = function() {
     if (roomAnalysis.my) {
       _.each(roomAnalysis.memory.sources, (source) => {
         const pos = utils.decodePosition(source.pos);
-        const miningFlag = _.first(_.filter(pos.lookFor(LOOK_FLAGS), (f) => {f.color == COLOR_WHITE}));
+        // TODO: check if this wokrs :/
+        const miningFlag = _.first(_.filter(pos.lookFor(LOOK_FLAGS), (f) => {
+          f.color == COLOR_WHITE
+        }));
         if (!miningFlag) toBePlaced.push(pos);
       });
     }
   });
 
   _.each(toBePlaced, (pos) => {
-    this.logger.info('mining flag to be placed ' + utils.encodePosition(pos));
     this.placeMiningFlag(pos)
   });
+}
+
+Miner.prototype.getAssignedFlagsMiners = function() {
+  return new Set(_.map(overseer.miner.assignedMiners, (flagName, creepName) => {
+    return flagName
+  }));
+}
+
+Miner.prototype.getAssignedFlagsDumpTruck = function() {
+  return new Set(_.map(overseer.miner.assignedDumpTrucks, (flagName, creepName) => {
+    return flagName
+  }));
+}
+
+Miner.prototype.getMinerTarget = function(creepName) {
+  if (!(creepName in overseer.miner.assignedMiners)) overseer.miner.assignNewMiner(creepName);
+  return overseer.miner.locationDetails[overseer.miner.assignedMiners[creepName]];
+};
+
+Miner.prototype.getDumpTruckTarget = function(creepName) {
+  if (!(creepName in overseer.miner.assignedDumpTrucks)) overseer.miner.assignNewDumpTruck(creepName);
+  return overseer.miner.locationDetails[overseer.miner.assignedDumpTrucks[creepName]];
+};
+
+Miner.prototype.assignNewMiner = function(creepName) {
+  const allFlags = _.keys(overseer.miner.locationDetails);
+  const assignedFlags = overseer.miner.getAssignedFlagsMiners();
+  const flagName = _.first(allFlags.filter((x) => !assignedFlags.has(x)));
+  overseer.miner.assignedMiners[creepName] = flagName;
+};
+
+Miner.prototype.assignNewDumpTruck = function(creepName) {
+  console.log('assignNewDumpTruck creepname: ' + creepName);
+  const allFlags = _.keys(overseer.miner.locationDetails);
+  console.log('assignNewDumpTruck allFlags: ' + allFlags);
+  const assignedFlags = overseer.miner.getAssignedFlagsDumpTruck();
+  console.log('assignNewDumpTruck assignedFlags: ' + assignedFlags);
+  const flagName = _.first(allFlags.filter((x) => !assignedFlags.has(x)));
+  console.log('assignNewDumpTruck flagName: ' + flagName);
+  overseer.miner.assignedDumpTrucks[creepName] = flagName;
+};
+
+Miner.prototype.clearCreep = function(creepName) {
+  if (creepName in overseer.miner.assignedMiners) delete overseer.miner.assignedMiners[creepName];
+  else if (creepName in overseer.miner.assignedDumpTrucks) delete overseer.miner.assignedDumpTrucks[creepName];
 }
 
 

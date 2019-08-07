@@ -51,9 +51,9 @@ Tasker.prototype.moveCreepToUnassigned = function(creepName) {
 Tasker.prototype.getMissingCreeps = function() {
   _.each(Game.creeps, (creep, creepName) => {
     if (creepName in this.assignedTasks && this.assignedTasks[creepName] !== undefined) {
-      this.logger.debug('creep ' + creepName + ' is in assignedTasks');
+      // this.logger.debug('creep ' + creepName + ' is in assignedTasks');
     } else if (this.unassignedCreeps.has(creepName)) {
-      this.logger.debug('creep ' + creepName + ' is in unassignedTasks');
+      // this.logger.debug('creep ' + creepName + ' is in unassignedTasks');
     } else {
       this.logger.info('creep ' + creepName + 'not managed adding it to unassignedCreeps');
       this.unassignedCreeps.add(creepName);

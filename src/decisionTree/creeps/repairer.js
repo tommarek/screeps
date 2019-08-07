@@ -50,7 +50,7 @@ const actionRepair = function(c) {
 
 const actionWithdrawEnergy = function(c) {
   let task = overseer.tasker.getTask(c);
-  task.assignWithdaw(
+  task.assignWithdraw(
     target = task.target,
     taskEndCondition = once,
     resourceType = RESOURCE_ENERGY,
