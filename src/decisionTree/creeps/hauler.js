@@ -1,6 +1,7 @@
 'use strict';
 
 const DecisionCase = require('decisionCase');
+const DTIdler = require('decisionTree.creeps.idler');
 
 // checks
 const once = (c) => {
@@ -10,8 +11,7 @@ const isEmpty = (c) => {
   return c.carry.energy == 0
 };
 const isWithinDistanceToTarget = (c, range) => {
-  const task = overseer.tasker.getTask(c);
-  return c.pos.getRangeTo(task.target) <= range
+  return c.pos.getRangeTo(overseer.tasker.getTempTarget()) <= range
 };
 const isCloseEnoughToTransfer = (c) => {
   return isWithinDistanceToTarget(c, 1)
@@ -21,34 +21,50 @@ const isCloseEnoughToWithdraw = (c) => {
 };
 
 //targetting
-const assignTargetStore = function(c) {
-  let task = overseer.tasker.getTask(c);
-  task.assignTarget(c.findTransferTarget());
-  overseer.tasker.setTask(task);
-};
-const assignTargetWithdrawEnergy = function(c) {
-  let task = overseer.tasker.getTask(c);
-  task.assignTarget(c.findStorage());
-  overseer.tasker.setTask(task);
+const shouldWithdraw = function(c) {
+  if (!isEmpty(c)) return false;
+  const target = c.pos.findClosestByRange(FIND_STRUCTURES, {
+    filter: (s) => s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE && s.store[RESOURCE_ENERGY] > 0
+  });
+  if (target) {
+    overseer.tasker.setTempTarget(target);
+    console.log('hauler: should withdraw');
+    return true;
+  }
+  console.log('hauler: should not withdraw');
+  return false;
 };
 
+const shouldTransfer = function(c) {
+  if (isEmpty(c)) return false;
+  const target = c.findTransferTarget();
+  if (target) {
+    overseer.tasker.setTempTarget(target);
+    console.log('hauler: should transfer');
+    return true;
+  }
+  console.log('hauler: should not transfer');
+  return false;
+};
+
+
 // Actions
-const actionTransfer = function(c) {
+const actionWithdraw = function(c) {
   let task = overseer.tasker.getTask(c);
-  task.assignTransfer(
-    task.target,
+  task.assignWithdraw(
+    overseer.tasker.getTempTarget(),
     once,
-    RESOURCE_ENERGY,
+    RESOURCE_ENERGY
   );
   overseer.tasker.setTask(task);
 };
 
-const actionWithdrawEnergy = function(c) {
+const actionTransfer = function(c) {
   let task = overseer.tasker.getTask(c);
-  task.assignWithdraw(
-    task.target,
+  task.assignTransfer(
+    overseer.tasker.getTempTarget(),
     once,
-    RESOURCE_ENERGY
+    RESOURCE_ENERGY,
   );
   overseer.tasker.setTask(task);
 };
@@ -56,21 +72,20 @@ const actionWithdrawEnergy = function(c) {
 const actionMoveToWithdraw = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
-    task.target,
+    overseer.tasker.getTempTarget(),
     isCloseEnoughToWithdraw, {
       visualizePathStyle: {
         stroke: '#ffffff'
       },
-    },
+    }
   );
   overseer.tasker.setTask(task);
 };
 
 const actionMoveToTransfer = function(c) {
   let task = overseer.tasker.getTask(c);
-  const target = task.target;
   task.assignMoveTo(
-    target,
+    overseer.tasker.getTempTarget(),
     isCloseEnoughToTransfer, {
       visualizePathStyle: {
         stroke: '#ffffff'
@@ -81,28 +96,26 @@ const actionMoveToTransfer = function(c) {
 };
 
 // decisionTree
-const DTHaulerEmpty = new DecisionCase(
+const DTWithdraw = new DecisionCase(
   true,
   Array(
-    new DecisionCase(isCloseEnoughToWithdraw, actionWithdrawEnergy),
+    new DecisionCase(isCloseEnoughToWithdraw, actionWithdraw),
     new DecisionCase(true, actionMoveToWithdraw),
-  ),
-  assignTargetWithdrawEnergy
+  )
 );
-const DTHaulerNotEmpty = new DecisionCase(
+const DTTransfer = new DecisionCase(
   true,
   Array(
     new DecisionCase(isCloseEnoughToTransfer, actionTransfer),
     new DecisionCase(true, actionMoveToTransfer),
-  ),
-  assignTargetStore
+  )
 );
 const DTHauler = new DecisionCase(
   true,
   Array(
-    // TODO! conver this to Should.... and add idler branch
-    new DecisionCase(isEmpty, DTHaulerEmpty),
-    new DecisionCase(true, DTHaulerNotEmpty),
+    new DecisionCase(shouldWithdraw, DTWithdraw),
+    new DecisionCase(shouldTransfer, DTTransfer),
+    new DecisionCase(true, DTIdler),
   )
 );
 

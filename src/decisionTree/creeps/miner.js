@@ -17,8 +17,7 @@ const isFull = (c) => {
   return _.sum(c.carry) == c.carryCapacity
 };
 const isWithinDistanceToTarget = (c, range) => {
-  const task = overseer.tasker.getTask(c);
-  return c.pos.getRangeTo(task.target) <= range
+  return c.pos.getRangeTo(overseer.tasker.getTempTarget()) <= range
 };
 const isCloseEnoughToHarvest = (c) => {
   return isWithinDistanceToTarget(c, 1)
@@ -35,47 +34,61 @@ const isOnMiningLocation = (c) => {
 };
 
 //targetting
-const assignTargetHarvest = function(c) {
-  let task = overseer.tasker.getTask(c);
+const shouldMine = function(c) {
+  if (!isEmpty(c)) return false;
   const target = overseer.miner.getMinerTarget(c.name);
-  task.assignTarget(target.source);
-  overseer.tasker.setTask(task);
-};
+  if (target) {
+    overseer.tasker.setTempTarget(target);
+    return true;
+  }
+  return false;
+}
 
-const assignTargetTransfer = function(c) {
-  let task = overseer.tasker.getTask(c);
+const shouldTransfer = function(c) {
+  if (c.getActiveBodyparts(CARRY) == 0 || isEmpty(c)) return false;
   const target = overseer.miner.getMinerTarget(c.name);
-  task.assignTarget(target.container);
-  overseer.tasker.setTask(task);
-};
+  if (target.container && container.storeCapacity - _.sum(container.store) < c.carry[RESOURCE_ENERGY]) {
+    overseer.tasker.setTempTarget(target.container);
+    return true;
+  }
+  return false;
+}
+
+const shouldDrop = function(c) {
+  if (c.getActiveBodyparts(CARRY) == 0 || isEmpty(c)) return false;
+  const target = overseer.miner.getMinerTarget(c.name);
+  if (!target.container) {
+    overseer.tasker.setTempTarget(undefined);
+    return true;
+  }
+  return false;
+}
+
 
 // Actions
 const actionTransfer = function(c) {
   let task = overseer.tasker.getTask(c);
-  const target = overseer.miner.getMinerTarget(c.name);
   task.assignTransfer(
-    target.container,
+    overseer.tasker.getTempTarget(),
     once,
     RESOURCE_ENERGY
   );
   overseer.tasker.setTask(task);
 };
 
-const actionHarvestEnergy = function(c) {
+const actionMine = function(c) {
   let task = overseer.tasker.getTask(c);
-  const target = overseer.miner.getMinerTarget(c.name);
   task.assignHarvest(
-    target.source,
+    overseer.tasker.getTempTarget(),
     forever,
   );
   overseer.tasker.setTask(task);
 };
 
-const actionMoveToSource = function(c) {
+const actionMoveToMiningLocation = function(c) {
   let task = overseer.tasker.getTask(c);
-  const target = overseer.miner.getMinerTarget(c.name);
   task.assignMoveTo(
-    target.miningPos,
+    overseer.tasker.getTempTarget(),
     isOnTargetLocation, {
       visualizePathStyle: {
         stroke: '#ffffff'
@@ -85,42 +98,27 @@ const actionMoveToSource = function(c) {
   overseer.tasker.setTask(task);
 };
 
-const actionMoveToTransfer = function(c) {
-  let task = overseer.tasker.getTask(c);
-  const target = overseer.miner.getMinerTarget(c.name);
-  task.assignMoveTo(
-    target.miningPos,
-    isOnTargetLocation, {
-      visualizePathStyle: {
-        stroke: '#ffffff'
-      },
-    }
-  );
-  overseer.tasker.setTask(task);
-};
 
 // decisionTree
-const DTMinerEmpty = new DecisionCase(
+const DTMinerMine = new DecisionCase(
   true,
   Array(
-    new DecisionCase(isOnMiningLocation, actionHarvestEnergy),
-    new DecisionCase(true, actionMoveToSource),
-  ),
-  assignTargetHarvest
+    new DecisionCase(isOnMiningLocation, actionMine),
+    new DecisionCase(true, actionMoveToMiningLocation),
+  )
 );
-const DTMinerNotEmpty = new DecisionCase(
+const DTMinerTransfer = new DecisionCase(
   true,
   Array(
     new DecisionCase(isOnMiningLocation, actionTransfer),
-    new DecisionCase(true, actionMoveToTransfer),
-  ),
-  assignTargetTransfer
+    new DecisionCase(true, actionMoveToMiningLocation),
+  )
 );
 const DTMiner = new DecisionCase(
   true,
   Array(
-    new DecisionCase(isEmpty, DTMinerEmpty),
-    new DecisionCase(true, DTMinerNotEmpty),
+    new DecisionCase(shouldMine, DTMinerMine),
+    new DecisionCase(shouldTransfer, DTMinerTransfer),
   ),
 );
 

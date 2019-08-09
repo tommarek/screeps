@@ -10,8 +10,7 @@ const isEmpty = (c) => {
   return c.carry.energy == 0
 };
 const isWithinDistanceToTarget = (c, range) => {
-  const task = overseer.tasker.getTask(c);
-  return c.pos.getRangeTo(task.target) <= range
+  return c.pos.getRangeTo(overseer.tasker.getTempTarget()) <= range
 };
 const isCloseEnoughToUpgrade = (c) => {
   return isWithinDistanceToTarget(c, 3)
@@ -21,47 +20,53 @@ const isCloseEnoughToWithdraw = (c) => {
 };
 
 //targetting
-const assignTargetUpgrade = function(c) {
-  let task = overseer.tasker.getTask(c);
-  task.assignTarget(c.room.controller);
-  overseer.tasker.setTask(task);
+const shouldUpgrade = function(c) {
+  if (isEmpty(c)) return false;
+  overseer.tasker.setTempTarget(c.room.controller);
+  return true;
 };
-const assignTargetWithdrawEnergy = function(c) {
-  let task = overseer.tasker.getTask(c);
-  task.assignTarget(c.findStorage());
-  overseer.tasker.setTask(task);
+const shouldWithdraw = function(c) {
+  if (!isEmpty(c)) return false;
+
+  const target = c.pos.findClosestByRange(FIND_STRUCTURES, {
+    filter: (s) => s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE && s.store[RESOURCE_ENERGY] > 0
+  });
+  if (target) {
+    overseer.tasker.setTempTarget(target);
+    return true;
+  }
+  return false;
 };
 
 // Actions
 const actionUpgrade = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignUpgrade(
-    task.target,
+    overseer.tasker.getTempTarget(),
     isEmpty,
   );
   overseer.tasker.setTask(task);
 };
 
-const actionWithdrawEnergy = function(c) {
+const actionWithdraw = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignWithdraw(
-    task.target,
+    overseer.tasker.getTempTarget(),
     once,
-    RESOURCE_ENERGY,
-    c.carryCapacity,
+    RESOURCE_ENERGY
   );
   overseer.tasker.setTask(task);
 };
 
-const actionMoveToGetEnergy = function(c) {
+const actionMoveToWithdraw = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
-    task.target,
+    overseer.tasker.getTempTarget(),
     isCloseEnoughToWithdraw, {
       visualizePathStyle: {
         stroke: '#ffffff'
       },
-    },
+    }
   );
   overseer.tasker.setTask(task);
 };
@@ -69,7 +74,7 @@ const actionMoveToGetEnergy = function(c) {
 const actionMoveToUpgrade = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
-    task.target,
+    overseer.tasker.getTempTarget(),
     isCloseEnoughToUpgrade, {
       visualizePathStyle: {
         stroke: '#ffffff'
@@ -80,27 +85,25 @@ const actionMoveToUpgrade = function(c) {
 };
 
 // decisionTree
-const DTUpgraderEmpty = new DecisionCase(
+const DTUpgrade = new DecisionCase(
   true,
   Array(
-    new DecisionCase(isCloseEnoughToWithdraw, actionWithdrawEnergy),
-    new DecisionCase(true, actionMoveToGetEnergy),
-  ),
-  assignTargetWithdrawEnergy
+  new DecisionCase(isCloseEnoughToUpgrade, actionUpgrade),
+  new DecisionCase(true, actionMoveToUpgrade),
+  )
 );
-const DTUpgraderNotEmpty = new DecisionCase(
+const DTWithdraw = new DecisionCase(
   true,
   Array(
-    new DecisionCase(isCloseEnoughToUpgrade, actionUpgrade),
-    new DecisionCase(true, actionMoveToUpgrade),
-  ),
-  assignTargetUpgrade
+    new DecisionCase(isCloseEnoughToWithdraw, actionWithdraw),
+    new DecisionCase(true, actionMoveToWithdraw),
+  )
 );
 const DTUpgrader = new DecisionCase(
   true,
   Array(
-    new DecisionCase(isEmpty, DTUpgraderEmpty),
-    new DecisionCase(true, DTUpgraderNotEmpty),
+    new DecisionCase(shouldUpgrade, DTUpgrade),
+    new DecisionCase(shouldWithdraw, DTWithdraw),
   )
 );
 

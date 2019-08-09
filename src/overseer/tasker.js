@@ -28,19 +28,16 @@ Tasker.prototype.getTask = function(creep) {
 }
 
 Tasker.prototype.setTask = function(task) {
-  const creepName = task.object.name;
-  // if task is already set for the creep - update it
-  if (creepName in this.assignedTasks && this.assignedTasks[creepName]) {
-    _.each(_.keys(task), (key) => {
-      if (key != 'object' && key != 'lastReturn') {
-        if (task[key] && key !== 'task') this.assignedTasks[creepName][key] = task[key];
-      }
-    });
-  } else {
-    this.logger.info('Createad a new task; creepName: ' + creepName);
-    this.unassignedCreeps.delete(creepName);
-    this.assignedTasks[creepName] = task;
-  }
+  const creepName = task.creep.name;
+  this.unassignedCreeps.delete(creepName);
+  this.assignedTasks[creepName] = task;
+}
+
+Tasker.prototype.setTempTarget = function(target) {
+  this.memory.target = target;
+}
+Tasker.prototype.getTempTarget = function() {
+  return this.memory.target;
 }
 
 Tasker.prototype.moveCreepToUnassigned = function(creepName) {

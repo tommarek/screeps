@@ -10,8 +10,7 @@ const isEmpty = function(c) {
   return c.carry.energy == 0
 };
 const isWithinDistanceToTarget = function(c, range) {
-  const task = overseer.tasker.getTask(c);
-  return c.pos.getRangeTo(task.target) <= range
+  return c.pos.getRangeTo(overseer.tasker.getTempTarget()) <= range
 };
 const isCloseEnoughToLoot = function(c) {
   return isWithinDistanceToTarget(c, 1)
@@ -37,9 +36,7 @@ const shouldLootTombstones = function(c) {
     const target = creep.pos.findClosestByPath(
       _.map(roomAnalysis.memory.tombstones, (ts) => {return ts.object})
     );
-    let task = overseer.tasker.getTask(c);
-    task.assignTarget(target);
-    overseer.tasker.setTask(task);
+    overseer.tasker.setTempTarget(target);
     return true;
   }
   return false;

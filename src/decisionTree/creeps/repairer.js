@@ -1,70 +1,100 @@
 'use strict';
 
 const DecisionCase = require('decisionCase');
+const DTIdler = require('decisionTree.creeps.idler');
 
 // checks
-const once = (c) => {
+const once = function(c) {
   return true
 };
-const isEmpty = (c) => {
+const isEmpty = function(c) {
   return c.carry.energy == 0
 };
-const isWithinDistanceToTarget = (c, range) => {
+const isWithinDistanceToTarget = function(c, range) {
+  return c.pos.getRangeTo(overseer.tasker.getTempTarget()) <= range
+};
+const isCloseEnoughToBuild = function(c) {
+  return isWithinDistanceToTarget(c, 3)
+};
+const isCloseEnoughToWithdraw = function(c) {
+  return isWithinDistanceToTarget(c, 1)
+};
+const cantBuildOrRepair = function(c) {
   const task = overseer.tasker.getTask(c);
-  return c.pos.getRangeTo(task.target) <= range
-};
-const isCloseEnoughToRepair = (c) => {
-  isWithinDistanceToTarget(c, 3)
-};
-const isCloseEnoughToWithdraw = (c) => {
-  isWithinDistanceToTarget(c, 1)
+  if (task.lastReturn != OK || isEmpty(c)) {
+    return true;
+  }
+  return false;
+}
+
+// targetting
+const shouldBuild = function(c) {
+  if (isEmpty(c)) return false;
+  const target = c.findConstruction();
+  if (target) {
+    overseer.tasker.setTempTarget(target);
+    return true;
+  }
+  return false;
 };
 
-//targetting
-const assignTargetRepair = function(c) {
-  let task = overseer.tasker.getTask(c);
-  task.target = c.findRepair() || c.findConstruction();
-  overseer.tasker.setTask(task);
+const shouldRepair = function(c) {
+  if (isEmpty(c)) return false;
+  const target = c.findRepair();
+  if (target) {
+    overseer.tasker.setTempTarget(target);
+    return true;
+  }
+  return false;
 };
-const assignTargetWithdrawEnergy = function(c) {
-  let task = overseer.tasker.getTask(c);
-  task.target = c.findStorage();
-  overseer.tasker.setTask(task);
+
+const shouldWithdraw = function(c) {
+  if (!isEmpty(c)) return false;
+
+  const target = c.pos.findClosestByRange(FIND_STRUCTURES, {
+    filter: (s) => s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE && s.store[RESOURCE_ENERGY] > 0
+  });
+  if (target) {
+    overseer.tasker.setTempTarget(target);
+    return true;
+  }
+  return false;
 };
 
 // Actions
+const actionBuild = function(c) {
+  let task = overseer.tasker.getTask(c);
+  task.assignBuild(
+    overseer.tasker.getTempTarget(),
+    cantBuildOrRepair
+  );
+  overseer.tasker.setTask(task);
+};
+
 const actionRepair = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignRepair(
-    target = task.target,
-    taskEndCondition = (c) => {
-      let task = overseer.tasker.getActiveTask(c);
-      if (task.lastReturn != OK || isEmpty(c)) {
-        return true;
-      }
-      return false;
-    }
+    overseer.tasker.getTempTarget(),
+    cantBuildOrRepair
   );
   overseer.tasker.setTask(task);
 };
 
-const actionWithdrawEnergy = function(c) {
+const actionWithdraw = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignWithdraw(
-    target = task.target,
-    taskEndCondition = once,
-    resourceType = RESOURCE_ENERGY,
-    amount = c.carryCapacity,
+    overseer.tasker.getTempTarget(),
+    once,
+    RESOURCE_ENERGY
   );
   overseer.tasker.setTask(task);
 };
 
-const actionMoveToGetEnergy = function(c) {
+const actionMoveToWithdraw = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
-    target = task.target,
-    taskEndCondition = isCloseEnoughToWithdraw,
-    taskOptions = {
+    overseer.tasker.getTempTarget(),
+    isCloseEnoughToWithdraw, {
       visualizePathStyle: {
         stroke: '#ffffff'
       },
@@ -73,12 +103,11 @@ const actionMoveToGetEnergy = function(c) {
   overseer.tasker.setTask(task);
 };
 
-const actionMoveToRepair = function(c) {
+const actionMoveToBuild = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
-    target = task.target,
-    taskEndCondition = isCloseEnoughToRepair,
-    taskOptions = {
+    overseer.tasker.getTempTarget(c),
+    isCloseEnoughToBuild, {
       visualizePathStyle: {
         stroke: '#ffffff'
       },
@@ -88,27 +117,34 @@ const actionMoveToRepair = function(c) {
 };
 
 // decisionTree
-const DTRepairerEmpty = new DecisionCase(
+const DTBuild = new DecisionCase(
   true,
   Array(
-    new DecisionCase(isCloseEnoughToWithdraw, actionWithdrawEnergy),
-    new DecisionCase(true, actionMoveToGetEnergy),
-  ),
-  assignTargetWithdrawEnergy
+    new DecisionCase(isCloseEnoughToBuild, actionBuild),
+    new DecisionCase(true, actionMoveToBuild),
+  )
 );
-const DTRepairerNotEmpty = new DecisionCase(
+const DTRepair = new DecisionCase(
   true,
   Array(
-    new DecisionCase(isCloseEnoughToRepair, actionRepair),
-    new DecisionCase(true, actionMoveToRepair),
+    new DecisionCase(isCloseEnoughToBuild, actionRepair),
+    new DecisionCase(true, actionMoveToBuild),
+  )
+);
+const DTWithdraw = new DecisionCase(
+  true,
+  Array(
+    new DecisionCase(isCloseEnoughToWithdraw, actionWithdraw),
+    new DecisionCase(true, actionMoveToWithdraw),
   ),
-  assignTargetRepair
 );
 const DTRepairer = new DecisionCase(
   true,
   Array(
-    new DecisionCase(isEmpty, DTRepairerEmpty),
-    new DecisionCase(true, DTRepairerNotEmpty),
+    new DecisionCase(shouldRepair, DTRepair),
+    new DecisionCase(shouldBuild, DTBuild),
+    new DecisionCase(shouldWithdraw, DTWithdraw),
+    new DecisionCase(true, DTIdler),
   )
 );
 

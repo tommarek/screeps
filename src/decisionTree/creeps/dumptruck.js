@@ -16,8 +16,7 @@ const isFull = (c) => {
   return _.sum(c.carry) == c.carryCapacity
 };
 const isWithinDistanceToTarget = (c, range) => {
-  const task = overseer.tasker.getTask(c);
-  return c.pos.getRangeTo(task.target) <= range
+  return c.pos.getRangeTo(overseer.tasker.getTempTarget()) <= range
 };
 const isCloseEnoughToPickup = (c) => {
   return isWithinDistanceToTarget(c, 1)
@@ -35,9 +34,7 @@ const shouldPickup = function(c) {
   const target = overseer.miner.getDumpTruckTarget(c.name);
   const energy = _.first(target.miningPos.lookFor(LOOK_ENERGY));
   if (energy) {
-    let task = overseer.tasker.getTask(c);
-    task.assignTarget(energy);
-    overseer.tasker.setTask(task);
+    overseer.tasker.setTempTarget(energy);
     return true;
   }
   return false;
@@ -48,9 +45,7 @@ const shouldWithdraw = function(c) {
   const target = overseer.miner.getDumpTruckTarget(c.name);
   const container = target.container;
   if (container) {
-    let task = overseer.tasker.getTask(c);
-    task.assignTarget(target.container);
-    overseer.tasker.setTask(task);
+    overseer.tasker.setTempTarget(container);
     return true;
   }
   return false;
@@ -60,9 +55,7 @@ const shouldTransfer = function(c) {
   if (isEmpty(c)) return false;
   const storage = c.room.storage;
   if (storage) {
-    let task = overseer.tasker.getTask(c);
-    task.assignTarget(storage);
-    overseer.tasker.setTask(task);
+    overseer.tasker.setTempTarget(storage);
     return true;
   }
   return false;
@@ -72,7 +65,7 @@ const shouldTransfer = function(c) {
 const actionPickup = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignPickup(
-    task.target,
+    overseer.tasker.getTempTarget(),
     once
   );
   overseer.tasker.setTask(task);
@@ -81,7 +74,7 @@ const actionPickup = function(c) {
 const actionWithdraw = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignWithdraw(
-    task.target,
+    overseer.tasker.getTempTarget(),
     once,
     RESOURCE_ENERGY
   );
@@ -91,7 +84,7 @@ const actionWithdraw = function(c) {
 const actionTransfer = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignTransfer(
-    task.target,
+    overseer.tasker.getTempTarget(),
     once,
     RESOURCE_ENERGY
   );
@@ -101,7 +94,7 @@ const actionTransfer = function(c) {
 const actionMoveToPickup = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
-    task.target,
+    overseer.tasker.getTempTarget(),
     isCloseEnoughToPickup, {
       visualizePathStyle: {
         stroke: '#ffffff'
@@ -114,7 +107,7 @@ const actionMoveToPickup = function(c) {
 const actionMoveToWithdraw = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
-    task.target,
+    overseer.tasker.getTempTarget(),
     isCloseEnoughToWithdraw, {
       visualizePathStyle: {
         stroke: '#ffffff'
@@ -127,7 +120,7 @@ const actionMoveToWithdraw = function(c) {
 const actionMoveToTransfer = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
-    task.target,
+    overseer.tasker.getTempTarget(),
     isCloseEnoughToTransfer, {
       visualizePathStyle: {
         stroke: '#ffffff'

@@ -11,8 +11,7 @@ const isEmpty = function(c) {
   return c.carry.energy == 0
 };
 const isWithinDistanceToTarget = function(c, range) {
-  const task = overseer.tasker.getTask(c);
-  return c.pos.getRangeTo(task.target) <= range
+  return c.pos.getRangeTo(overseer.tasker.getTempTarget()) <= range
 };
 const isCloseEnoughToBuild = function(c) {
   return isWithinDistanceToTarget(c, 3)
@@ -33,9 +32,7 @@ const shouldBuild = function(c) {
   if (isEmpty(c)) return false;
   const target = c.findConstruction();
   if (target) {
-    let task = overseer.tasker.getTask(c);
-    task.assignTarget(target);
-    overseer.tasker.setTask(task);
+    overseer.tasker.setTempTarget(target);
     return true;
   }
   return false;
@@ -45,9 +42,7 @@ const shouldRepair = function(c) {
   if (isEmpty(c)) return false;
   const target = c.findRepair();
   if (target) {
-    let task = overseer.tasker.getTask(c);
-    task.assignTarget(target);
-    overseer.tasker.setTask(task);
+    overseer.tasker.setTempTarget(target);
     return true;
   }
   return false;
@@ -60,9 +55,7 @@ const shouldWithdraw = function(c) {
     filter: (s) => s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE && s.store[RESOURCE_ENERGY] > 0
   });
   if (target) {
-    let task = overseer.tasker.getTask(c);
-    task.assignTarget(target);
-    overseer.tasker.setTask(task);
+    overseer.tasker.setTempTarget(target);
     return true;
   }
   return false;
@@ -72,7 +65,7 @@ const shouldWithdraw = function(c) {
 const actionBuild = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignBuild(
-    task.target,
+    overseer.tasker.getTempTarget(),
     cantBuildOrRepair
   );
   overseer.tasker.setTask(task);
@@ -81,7 +74,7 @@ const actionBuild = function(c) {
 const actionRepair = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignRepair(
-    task.target,
+    overseer.tasker.getTempTarget(),
     cantBuildOrRepair
   );
   overseer.tasker.setTask(task);
@@ -90,7 +83,7 @@ const actionRepair = function(c) {
 const actionWithdraw = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignWithdraw(
-    task.target,
+    overseer.tasker.getTempTarget(),
     once,
     RESOURCE_ENERGY
   );
@@ -100,7 +93,7 @@ const actionWithdraw = function(c) {
 const actionMoveToWithdraw = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
-    task.target,
+    overseer.tasker.getTempTarget(),
     isCloseEnoughToWithdraw, {
       visualizePathStyle: {
         stroke: '#ffffff'
@@ -113,7 +106,7 @@ const actionMoveToWithdraw = function(c) {
 const actionMoveToBuild = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
-    task.target,
+    overseer.tasker.getTempTarget(c),
     isCloseEnoughToBuild, {
       visualizePathStyle: {
         stroke: '#ffffff'
@@ -124,21 +117,21 @@ const actionMoveToBuild = function(c) {
 };
 
 // decisionTree
-const DTBuilderBuild = new DecisionCase(
+const DTBuild = new DecisionCase(
   true,
   Array(
     new DecisionCase(isCloseEnoughToBuild, actionBuild),
     new DecisionCase(true, actionMoveToBuild),
   )
 );
-const DTBuilderRepair = new DecisionCase(
+const DTRepair = new DecisionCase(
   true,
   Array(
     new DecisionCase(isCloseEnoughToBuild, actionRepair),
     new DecisionCase(true, actionMoveToBuild),
   )
 );
-const DTBuilderWIthdraw = new DecisionCase(
+const DTWithdraw = new DecisionCase(
   true,
   Array(
     new DecisionCase(isCloseEnoughToWithdraw, actionWithdraw),
@@ -148,9 +141,9 @@ const DTBuilderWIthdraw = new DecisionCase(
 const DTBuilder = new DecisionCase(
   true,
   Array(
-    new DecisionCase(shouldBuild, DTBuilderBuild),
-    new DecisionCase(shouldRepair, DTBuilderRepair),
-    new DecisionCase(shouldWithdraw, DTBuilderWIthdraw),
+    new DecisionCase(shouldBuild, DTBuild),
+    new DecisionCase(shouldRepair, DTRepair),
+    new DecisionCase(shouldWithdraw, DTWithdraw),
     new DecisionCase(true, DTIdler),
   )
 );

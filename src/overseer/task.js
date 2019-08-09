@@ -1,109 +1,134 @@
 'use strict';
 
-const Task = function(object, task = undefined, taskOptions = undefined, target, taskCondition = undefined) {
-  this.object = object;
-  this.task = task;
-  this.target = target;
-  this.taskEndCondition = taskCondition;
-  this.lastReturn = undefined;
+const Task = function(creep, taskEndCondition = undefined) {
+  this.creep = creep;
+  this.subtasks = [];
+  this.taskEndCondition = taskEndCondition;
 }
 
 Task.prototype.execute = function() {
-  if (!this.task || !this.object) return null;
-  this.refreshObject();
-  this.lastReturn = this[this.task]();
-  return this.lastReturn;
+  this.refreshCreep();
+  if (!this.subtasks || !this.creep) return undefined
+  const ret = {};
+  for (var i = 0; i < this.subtasks.length; ++i) {
+    if (this.subtasks[i].target) {
+      const subtask = this.subtasks[i];
+      const lastReturn = this[subtask.task](subtask);
+      if (lastReturn != OK) ret[this.subtasks[i].task] = lastReturn;
+    }
+  }
+  if (Object.keys(ret).length === 0) return OK;
+  return ret;
 }
 
 Task.prototype.taskEnded = function() {
-  this.refreshObject();
-  if (this.taskEndCondition === undefined) return true;
-  return this.taskEndCondition(this.object)
+  this.refreshCreep();
+  if (!this.creep) return true;
+  return this.subtasks.some((task) => {return task.taskEndCondition(this.creep)});
 };
 
-Task.prototype.refreshObject = function() {
-  this.object = Game.getObjectById(this.object.id);
+Task.prototype.refreshCreep = function(creep) {
+  try {
+    return Game.getCreepById(this.creep.id);
+  } catch (e) {
+    return undefined;
+  }
 }
 
-Task.prototype.assignTarget = function(target) {
-  this.target = target
-}
 
-Task.prototype.build = function() {
-  return this.object.build(this.target)
+Task.prototype.build = function(task) {
+  return this.creep.build(task.target)
 }
 Task.prototype.assignBuild = function(target, taskEndCondition) {
-  this.task = 'build'
-  this.target = target;
-  this.taskEndCondition = taskEndCondition;
+  this.subtasks.push({
+    task: 'build',
+    target: target,
+    taskEndCondition: taskEndCondition,
+  });
 };
 
-Task.prototype.harvest = function() {
-  return this.object.harvest(this.target)
+Task.prototype.harvest = function(task) {
+  return this.creep.harvest(task.target)
 }
 Task.prototype.assignHarvest = function(target, taskEndCondition) {
-  this.task = 'harvest';
-  this.target = target;
-  this.taskEndCondition = taskEndCondition;
+  this.subtasks.push({
+    task: 'harvest',
+    target: target,
+    taskEndCondition: taskEndCondition,
+  });
 };
 
-Task.prototype.moveTo = function() {
-  return this.object.moveTo(this.target, this.taskOptions);
+Task.prototype.moveTo = function(task) {
+  return this.creep.moveTo(task.target, task.taskOptions);
 };
 Task.prototype.assignMoveTo = function(target, taskEndCondition, taskOptions = {}) {
-  this.task = 'moveTo';
-  this.target = target;
-  this.taskEndCondition = taskEndCondition;
-  this.taskOptions = taskOptions;
+  this.subtasks.push({
+    task: 'moveTo',
+    target: target,
+    taskEndCondition: taskEndCondition,
+    taskOptions: taskOptions,
+  });
 };
 
-Task.prototype.pickup = function() {
-  return this.object.pickup(this.target)
+Task.prototype.pickup = function(task) {
+  return this.creep.pickup(task.target)
 };
 Task.prototype.assignPickup = function(target, taskEndCondition) {
-  this.task = 'pickup';
-  this.target = target;
-  this.taskEndCondition = taskEndCondition;
+  this.subtasks.push({
+    task: 'pickup',
+    target: target,
+    taskEndCondition: taskEndCondition,
+  });
 };
 
-Task.prototype.repair = function() {
-  return this.object.repair(this.target)
+Task.prototype.repair = function(task) {
+  return this.creep.repair(task.target)
 };
 Task.prototype.assignRepair = function(target, taskEndCondition) {
-  this.task = 'repair';
-  this.target = target;
-  this.taskEndCondition = taskEndCondition;
+  this.subtasks.push({
+    task: 'repair',
+    target: target,
+    taskEndCondition: taskEndCondition,
+  });
 };
 
-Task.prototype.transfer = function() {
-  return this.object.transfer(this.target, this.resourceType, this.amount)
+Task.prototype.transfer = function(task) {
+  console.log('calling transfer with args: target = ' + task.target + '; resourceType = ' + task.resourceType + '; amount = ' + task.amount);
+  return this.creep.transfer(task.target, task.resourceType, task.amount)
 };
 Task.prototype.assignTransfer = function(target, taskEndCondition, resourceType, amount = undefined) {
-  this.task = 'transfer';
-  this.target = target;
-  this.taskEndCondition = taskEndCondition;
-  this.resourceType = resourceType;
-  this.amount = amount;
+  console.log('assigning transfer: target = ' + target + '; reosurceType = ' + resourceType + '; amount = ' + amount);
+  this.subtasks.push({
+    task: 'transfer',
+    target: target,
+    taskEndCondition: taskEndCondition,
+    resourceType: resourceType,
+    amount: amount,
+  });
 };
 
-Task.prototype.upgrade = function() {
-  return this.object.upgradeController(this.target)
+Task.prototype.upgrade = function(task) {
+  return this.creep.upgradeController(task.target)
 };
 Task.prototype.assignUpgrade = function(target, taskEndCondition) {
-  this.task = 'upgrade';
-  this.target = target;
-  this.taskEndCondition = taskEndCondition;
+  this.subtasks.push({
+    task: 'upgrade',
+    target: target,
+    taskEndCondition: taskEndCondition,
+  });
 };
 
-Task.prototype.withdraw = function() {
-  return this.object.withdraw(this.target, this.resourceType, this.amount)
+Task.prototype.withdraw = function(task) {
+  return this.creep.withdraw(this.target, task.resourceType, task.amount)
 };
 Task.prototype.assignWithdraw = function(target, taskEndCondition, resourceType, amount = undefined) {
-  this.task = 'withdraw';
-  this.target = target;
-  this.taskEndCondition = taskEndCondition;
-  this.resourceType = resourceType;
-  this.amount = amount;
+  this.subtasks.push({
+    task: 'withdraw',
+    target: target,
+    taskEndCondition: taskEndCondition,
+    resourceType: resourceType,
+    amount: amount,
+  });
 };
 
 
