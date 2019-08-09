@@ -2,6 +2,7 @@
 
 const DecisionCase = require('decisionCase');
 const utils = require('utils');
+const Task = require('overseer.task');
 
 // checks
 const once = (c) => {
@@ -16,19 +17,20 @@ const isEmpty = (c) => {
 const isFull = (c) => {
   return _.sum(c.carry) == c.carryCapacity
 };
-const isWithinDistanceToTarget = (c, range) => {
-  return c.pos.getRangeTo(overseer.tasker.getTempTarget()) <= range
+const isWithinDistanceToTarget = function(c, range) {
+  console.log(c.name + ': target = ' + overseer.tasker.getCreepTarget(c.name) + ' distance is ' + c.pos.getRangeTo(overseer.tasker.getCreepTarget(c.name)));
+  return c.pos.getRangeTo(overseer.tasker.getCreepTarget(c.name)) <= range
 };
-const isCloseEnoughToHarvest = (c) => {
+const isCloseEnoughToHarvest = function(c) {
   return isWithinDistanceToTarget(c, 1)
 };
-const isCloseEnoughToTransfer = (c) => {
+const isCloseEnoughToTransfer = function(c) {
   return isWithinDistanceToTarget(c, 1)
 };
-const isOnTargetLocation = (c) => {
+const isOnTargetLocation = function(c) {
   return isWithinDistanceToTarget(c, 0)
 };
-const isOnMiningLocation = (c) => {
+const isOnMiningLocation = function(c) {
   const target = overseer.miner.getMinerTarget(c.name);
   return c.pos.getRangeTo(target.miningPos) == 0;
 };
@@ -38,7 +40,7 @@ const shouldMine = function(c) {
   if (!isEmpty(c)) return false;
   const target = overseer.miner.getMinerTarget(c.name);
   if (target) {
-    overseer.tasker.setTempTarget(target);
+    overseer.tasker.setCreepTarget(c.name, target.source);
     return true;
   }
   return false;
@@ -48,7 +50,7 @@ const shouldTransfer = function(c) {
   if (c.getActiveBodyparts(CARRY) == 0 || isEmpty(c)) return false;
   const target = overseer.miner.getMinerTarget(c.name);
   if (target.container && container.storeCapacity - _.sum(container.store) < c.carry[RESOURCE_ENERGY]) {
-    overseer.tasker.setTempTarget(target.container);
+    overseer.tasker.setCreepTarget(c.name, target.container);
     return true;
   }
   return false;
@@ -58,7 +60,7 @@ const shouldDrop = function(c) {
   if (c.getActiveBodyparts(CARRY) == 0 || isEmpty(c)) return false;
   const target = overseer.miner.getMinerTarget(c.name);
   if (!target.container) {
-    overseer.tasker.setTempTarget(undefined);
+    overseer.tasker.setCreepTarget(c.name, undefined);
     return true;
   }
   return false;
@@ -67,9 +69,9 @@ const shouldDrop = function(c) {
 
 // Actions
 const actionTransfer = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignTransfer(
-    overseer.tasker.getTempTarget(),
+    overseer.tasker.getCreepTarget(c.name),
     once,
     RESOURCE_ENERGY
   );
@@ -77,18 +79,18 @@ const actionTransfer = function(c) {
 };
 
 const actionMine = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignHarvest(
-    overseer.tasker.getTempTarget(),
+    overseer.tasker.getCreepTarget(c.name),
     forever,
   );
   overseer.tasker.setTask(task);
 };
 
 const actionMoveToMiningLocation = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignMoveTo(
-    overseer.tasker.getTempTarget(),
+    overseer.tasker.getCreepTarget(c.name),
     isOnTargetLocation, {
       visualizePathStyle: {
         stroke: '#ffffff'

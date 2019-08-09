@@ -1,6 +1,7 @@
 'use strict';
 
 const DecisionCase = require('decisionCase');
+const Task = require('overseer.task');
 
 // checks
 const once = (c) => {
@@ -25,19 +26,19 @@ const isCloseEnoughToTransfer = (c) => {
 
 //targetting
 const assignTargetTransfer = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.target = c.findStorage();
   overseer.tasker.setTask(task);
 };
 const assignTargetHarvest = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.target = c.findSource();
   overseer.tasker.setTask(task);
 };
 
 // Actions
 const actionTransfer = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignTransfer(
     target = task.target,
     taskEndCondition = once,
@@ -46,7 +47,7 @@ const actionTransfer = function(c) {
 };
 
 const actionHarvestEnergy = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignHarvest(
     target = task.target,
     taskEndCondition = isFull,
@@ -55,7 +56,7 @@ const actionHarvestEnergy = function(c) {
 };
 
 const actionMoveToSource = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignMoveTo(
     target = task.target,
     taskEndCondition = isCloseEnoughToWithdraw,
@@ -69,7 +70,7 @@ const actionMoveToSource = function(c) {
 };
 
 const actionMoveToTransfer = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignMoveTo(
     target = task.target,
     taskEndCondition = isCloseEnoughToBuild,

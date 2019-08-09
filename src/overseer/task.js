@@ -3,38 +3,40 @@
 const Task = function(creep, taskEndCondition = undefined) {
   this.creep = creep;
   this.subtasks = [];
-  this.taskEndCondition = taskEndCondition;
 }
 
 Task.prototype.execute = function() {
   this.refreshCreep();
-  if (!this.subtasks || !this.creep) return undefined
+  if (!this.subtasks || this.creep === undefined) return undefined
   const ret = {};
-  for (var i = 0; i < this.subtasks.length; ++i) {
-    if (this.subtasks[i].target) {
-      const subtask = this.subtasks[i];
+  _.each(this.subtasks, (subtask) => {
+    if (subtask.target) {
       const lastReturn = this[subtask.task](subtask);
-      if (lastReturn != OK) ret[this.subtasks[i].task] = lastReturn;
+      if (lastReturn != OK) ret[subtask.task] = lastReturn;
     }
-  }
+  });
   if (Object.keys(ret).length === 0) return OK;
   return ret;
 }
 
+Task.prototype.isUnusable = function() {
+  return !this.creep || this.subtasks.length === 0
+}
+
 Task.prototype.taskEnded = function() {
   this.refreshCreep();
-  if (!this.creep) return true;
-  return this.subtasks.some((task) => {return task.taskEndCondition(this.creep)});
+  if (this.creep === undefined) return true;
+  const ret = this.subtasks.some((task) => {return task.taskEndCondition(this.creep)});
+  return ret;
 };
 
 Task.prototype.refreshCreep = function(creep) {
   try {
-    return Game.getCreepById(this.creep.id);
+    this.creep = Game.getObjectById(this.creep.id);
   } catch (e) {
-    return undefined;
+    this.creep = undefined;
   }
 }
-
 
 Task.prototype.build = function(task) {
   return this.creep.build(task.target)
@@ -61,7 +63,7 @@ Task.prototype.assignHarvest = function(target, taskEndCondition) {
 Task.prototype.moveTo = function(task) {
   return this.creep.moveTo(task.target, task.taskOptions);
 };
-Task.prototype.assignMoveTo = function(target, taskEndCondition, taskOptions = {}) {
+Task.prototype.assignMoveTo = function(target, taskEndCondition, taskOptions=undefined) {
   this.subtasks.push({
     task: 'moveTo',
     target: target,
@@ -93,11 +95,9 @@ Task.prototype.assignRepair = function(target, taskEndCondition) {
 };
 
 Task.prototype.transfer = function(task) {
-  console.log('calling transfer with args: target = ' + task.target + '; resourceType = ' + task.resourceType + '; amount = ' + task.amount);
   return this.creep.transfer(task.target, task.resourceType, task.amount)
 };
 Task.prototype.assignTransfer = function(target, taskEndCondition, resourceType, amount = undefined) {
-  console.log('assigning transfer: target = ' + target + '; reosurceType = ' + resourceType + '; amount = ' + amount);
   this.subtasks.push({
     task: 'transfer',
     target: target,
@@ -119,7 +119,7 @@ Task.prototype.assignUpgrade = function(target, taskEndCondition) {
 };
 
 Task.prototype.withdraw = function(task) {
-  return this.creep.withdraw(this.target, task.resourceType, task.amount)
+  return this.creep.withdraw(task.target, task.resourceType, task.amount)
 };
 Task.prototype.assignWithdraw = function(target, taskEndCondition, resourceType, amount = undefined) {
   this.subtasks.push({

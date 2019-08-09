@@ -2,21 +2,22 @@
 
 const DecisionCase = require('decisionCase');
 const DTIdler = require('decisionTree.creeps.idler');
+const Task = require('overseer.task');
 
 // checks
-const once = (c) => {
+const once = function(c) {
   return true
 };
-const isEmpty = (c) => {
+const isEmpty = function(c) {
   return c.carry.energy == 0
 };
-const isWithinDistanceToTarget = (c, range) => {
-  return c.pos.getRangeTo(overseer.tasker.getTempTarget()) <= range
+const isWithinDistanceToTarget = function(c, range) {
+  return c.pos.getRangeTo(overseer.tasker.getCreepTarget(c.name)) <= range
 };
-const isCloseEnoughToTransfer = (c) => {
+const isCloseEnoughToTransfer = function(c) {
   return isWithinDistanceToTarget(c, 1)
 };
-const isCloseEnoughToWithdraw = (c) => {
+const isCloseEnoughToWithdraw = function(c) {
   return isWithinDistanceToTarget(c, 1)
 };
 
@@ -27,11 +28,9 @@ const shouldWithdraw = function(c) {
     filter: (s) => s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE && s.store[RESOURCE_ENERGY] > 0
   });
   if (target) {
-    overseer.tasker.setTempTarget(target);
-    console.log('hauler: should withdraw');
+    overseer.tasker.setCreepTarget(c.name, target);
     return true;
   }
-  console.log('hauler: should not withdraw');
   return false;
 };
 
@@ -39,20 +38,18 @@ const shouldTransfer = function(c) {
   if (isEmpty(c)) return false;
   const target = c.findTransferTarget();
   if (target) {
-    overseer.tasker.setTempTarget(target);
-    console.log('hauler: should transfer');
+    overseer.tasker.setCreepTarget(c.name, target);
     return true;
   }
-  console.log('hauler: should not transfer');
   return false;
 };
 
 
 // Actions
 const actionWithdraw = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignWithdraw(
-    overseer.tasker.getTempTarget(),
+    overseer.tasker.getCreepTarget(c.name),
     once,
     RESOURCE_ENERGY
   );
@@ -60,9 +57,9 @@ const actionWithdraw = function(c) {
 };
 
 const actionTransfer = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignTransfer(
-    overseer.tasker.getTempTarget(),
+    overseer.tasker.getCreepTarget(c.name),
     once,
     RESOURCE_ENERGY,
   );
@@ -70,9 +67,9 @@ const actionTransfer = function(c) {
 };
 
 const actionMoveToWithdraw = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignMoveTo(
-    overseer.tasker.getTempTarget(),
+    overseer.tasker.getCreepTarget(c.name),
     isCloseEnoughToWithdraw, {
       visualizePathStyle: {
         stroke: '#ffffff'
@@ -83,9 +80,9 @@ const actionMoveToWithdraw = function(c) {
 };
 
 const actionMoveToTransfer = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignMoveTo(
-    overseer.tasker.getTempTarget(),
+    overseer.tasker.getCreepTarget(c.name),
     isCloseEnoughToTransfer, {
       visualizePathStyle: {
         stroke: '#ffffff'

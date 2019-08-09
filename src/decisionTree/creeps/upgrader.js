@@ -1,28 +1,29 @@
 'use strict';
 
 const DecisionCase = require('decisionCase');
+const Task = require('overseer.task');
 
 // checks
 const once = (c) => {
   return true
 };
-const isEmpty = (c) => {
-  return c.carry.energy == 0
+const isEmpty = (c) => {;
+  return c.carry.energy == 0;
 };
-const isWithinDistanceToTarget = (c, range) => {
-  return c.pos.getRangeTo(overseer.tasker.getTempTarget()) <= range
+const isWithinDistanceToTarget = function(c, range) {
+  return c.pos.getRangeTo(overseer.tasker.getCreepTarget(c.name)) <= range
 };
-const isCloseEnoughToUpgrade = (c) => {
+const isCloseEnoughToUpgrade = function(c) {
   return isWithinDistanceToTarget(c, 3)
 };
-const isCloseEnoughToWithdraw = (c) => {
+const isCloseEnoughToWithdraw = function(c) {
   return isWithinDistanceToTarget(c, 1)
 };
 
 //targetting
 const shouldUpgrade = function(c) {
   if (isEmpty(c)) return false;
-  overseer.tasker.setTempTarget(c.room.controller);
+  overseer.tasker.setCreepTarget(c.name, c.room.controller);
   return true;
 };
 const shouldWithdraw = function(c) {
@@ -32,7 +33,7 @@ const shouldWithdraw = function(c) {
     filter: (s) => s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE && s.store[RESOURCE_ENERGY] > 0
   });
   if (target) {
-    overseer.tasker.setTempTarget(target);
+    overseer.tasker.setCreepTarget(c.name, target);
     return true;
   }
   return false;
@@ -40,18 +41,18 @@ const shouldWithdraw = function(c) {
 
 // Actions
 const actionUpgrade = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignUpgrade(
-    overseer.tasker.getTempTarget(),
+    overseer.tasker.getCreepTarget(c.name),
     isEmpty,
   );
   overseer.tasker.setTask(task);
 };
 
 const actionWithdraw = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignWithdraw(
-    overseer.tasker.getTempTarget(),
+    overseer.tasker.getCreepTarget(c.name),
     once,
     RESOURCE_ENERGY
   );
@@ -59,9 +60,9 @@ const actionWithdraw = function(c) {
 };
 
 const actionMoveToWithdraw = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignMoveTo(
-    overseer.tasker.getTempTarget(),
+    overseer.tasker.getCreepTarget(c.name),
     isCloseEnoughToWithdraw, {
       visualizePathStyle: {
         stroke: '#ffffff'
@@ -72,9 +73,9 @@ const actionMoveToWithdraw = function(c) {
 };
 
 const actionMoveToUpgrade = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignMoveTo(
-    overseer.tasker.getTempTarget(),
+    overseer.tasker.getCreepTarget(c.name),
     isCloseEnoughToUpgrade, {
       visualizePathStyle: {
         stroke: '#ffffff'

@@ -28,9 +28,10 @@ ProcessTasker.prototype.executeAssignedTasks = function() {
       overseer.tasker.moveCreepToUnassigned(creepName);
     } else {
       const ret = task.execute();
-      console.log(task.creep.name + ': executed task ' + task.subtasks[0].task + '; got return: ' + JSON.stringify(ret));
       if (ret != OK) {
         overseer.tasker.moveCreepToUnassigned(creepName);
+      } else {
+        this.logger.debug(task.creep.name + ': executed task ' + task.subtasks[0].task + '; got return: ' + JSON.stringify(ret));
       }
     }
   });
@@ -39,10 +40,7 @@ ProcessTasker.prototype.executeAssignedTasks = function() {
 ProcessTasker.prototype.assignNewTasks = function() {
   // remove invalid or finished tasks so they can be reassigned
   _.each(overseer.tasker.assignedTasks, (task, creepName) => {
-    if (task == undefined || task.taskEnded()){
-      console.log('moving to unassigned creep: ' + creepName + 'task = ' + task);
-      overseer.tasker.moveCreepToUnassigned(creepName);
-    }
+    if (task == undefined || task.isUnusable() ||task.taskEnded()) overseer.tasker.moveCreepToUnassigned(creepName);
   });
   // assign tasks
   const unassigned = overseer.tasker.getCreepNamesUnassigned();

@@ -2,6 +2,7 @@
 
 const DecisionCase = require('decisionCase');
 const DTIdler = require('decisionTree.creeps.idler');
+const Task = require('overseer.task');
 
 // checks
 const once = function(c) {
@@ -11,7 +12,7 @@ const isEmpty = function(c) {
   return c.carry.energy == 0
 };
 const isWithinDistanceToTarget = function(c, range) {
-  return c.pos.getRangeTo(overseer.tasker.getTempTarget()) <= range
+  return c.pos.getRangeTo(overseer.tasker.getCreepTarget(c.name)) <= range
 };
 const isCloseEnoughToBuild = function(c) {
   return isWithinDistanceToTarget(c, 3)
@@ -32,7 +33,7 @@ const shouldBuild = function(c) {
   if (isEmpty(c)) return false;
   const target = c.findConstruction();
   if (target) {
-    overseer.tasker.setTempTarget(target);
+    overseer.tasker.setCreepTarget(c.name, target);
     return true;
   }
   return false;
@@ -42,7 +43,7 @@ const shouldRepair = function(c) {
   if (isEmpty(c)) return false;
   const target = c.findRepair();
   if (target) {
-    overseer.tasker.setTempTarget(target);
+    overseer.tasker.setCreepTarget(c.name, target);
     return true;
   }
   return false;
@@ -55,7 +56,7 @@ const shouldWithdraw = function(c) {
     filter: (s) => s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE && s.store[RESOURCE_ENERGY] > 0
   });
   if (target) {
-    overseer.tasker.setTempTarget(target);
+    overseer.tasker.setCreepTarget(c.name, target);
     return true;
   }
   return false;
@@ -63,27 +64,27 @@ const shouldWithdraw = function(c) {
 
 // Actions
 const actionBuild = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignBuild(
-    overseer.tasker.getTempTarget(),
+    overseer.tasker.getCreepTarget(c.name),
     cantBuildOrRepair
   );
   overseer.tasker.setTask(task);
 };
 
 const actionRepair = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignRepair(
-    overseer.tasker.getTempTarget(),
+    overseer.tasker.getCreepTarget(c.name),
     cantBuildOrRepair
   );
   overseer.tasker.setTask(task);
 };
 
 const actionWithdraw = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignWithdraw(
-    overseer.tasker.getTempTarget(),
+    overseer.tasker.getCreepTarget(c.name),
     once,
     RESOURCE_ENERGY
   );
@@ -91,9 +92,9 @@ const actionWithdraw = function(c) {
 };
 
 const actionMoveToWithdraw = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignMoveTo(
-    overseer.tasker.getTempTarget(),
+    overseer.tasker.getCreepTarget(c.name),
     isCloseEnoughToWithdraw, {
       visualizePathStyle: {
         stroke: '#ffffff'
@@ -104,9 +105,9 @@ const actionMoveToWithdraw = function(c) {
 };
 
 const actionMoveToBuild = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignMoveTo(
-    overseer.tasker.getTempTarget(c),
+    overseer.tasker.getCreepTarget(c.name),
     isCloseEnoughToBuild, {
       visualizePathStyle: {
         stroke: '#ffffff'

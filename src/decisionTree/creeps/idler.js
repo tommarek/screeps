@@ -1,6 +1,7 @@
 'use strict';
 
 const DecisionCase = require('decisionCase');
+const Task = require('overseer.task');
 
 // checks
 const once = function(c) {
@@ -10,7 +11,7 @@ const isEmpty = function(c) {
   return c.carry.energy == 0
 };
 const isWithinDistanceToTarget = function(c, range) {
-  return c.pos.getRangeTo(overseer.tasker.getTempTarget()) <= range
+  return c.pos.getRangeTo(overseer.tasker.getCreepTarget(c.name)) <= range
 };
 const isCloseEnoughToLoot = function(c) {
   return isWithinDistanceToTarget(c, 1)
@@ -36,7 +37,7 @@ const shouldLootTombstones = function(c) {
     const target = creep.pos.findClosestByPath(
       _.map(roomAnalysis.memory.tombstones, (ts) => {return ts.object})
     );
-    overseer.tasker.setTempTarget(target);
+    overseer.tasker.setCreepTarget(c.name, target);
     return true;
   }
   return false;

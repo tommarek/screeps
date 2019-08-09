@@ -1,8 +1,9 @@
 # TODO
 ## Tasks
 [] generic tasks -- tasks that can be executed by any creep (needs to be prioritized)
-[] multitasks - https://docs.screeps.com/simultaneous-actions.html
+[x] multitasks - https://docs.screeps.com/simultaneous-actions.html
 [] Idlers
+[] Task dispenser -- creates a list of tasks that should be done this tick and creeps will pick the most suitable based on bodyparts/distance/importance
 
 ## Spawning
 [] automatic spawning

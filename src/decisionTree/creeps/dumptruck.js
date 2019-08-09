@@ -2,29 +2,30 @@
 
 const DecisionCase = require('decisionCase');
 const DTIdler = require('decisionTree.creeps.idler');
+const Task = require('overseer.task');
 
 const utils = require('utils');
 
 // checks
-const once = (c) => {
+const once = function(c) {
   return true
 };
-const isEmpty = (c) => {
+const isEmpty = function(c) {
   return c.carry.energy == 0
 };
-const isFull = (c) => {
+const isFull = function(c) {
   return _.sum(c.carry) == c.carryCapacity
 };
-const isWithinDistanceToTarget = (c, range) => {
-  return c.pos.getRangeTo(overseer.tasker.getTempTarget()) <= range
+const isWithinDistanceToTarget = function(c, range) {
+  return c.pos.getRangeTo(overseer.tasker.getCreepTarget(c.name)) <= range
 };
-const isCloseEnoughToPickup = (c) => {
+const isCloseEnoughToPickup = function(c) {
   return isWithinDistanceToTarget(c, 1)
 };
-const isCloseEnoughToWithdraw = (c) => {
+const isCloseEnoughToWithdraw = function(c) {
   return isWithinDistanceToTarget(c, 1)
 };
-const isCloseEnoughToTransfer = (c) => {
+const isCloseEnoughToTransfer = function(c) {
   return isWithinDistanceToTarget(c, 1)
 };
 
@@ -34,7 +35,7 @@ const shouldPickup = function(c) {
   const target = overseer.miner.getDumpTruckTarget(c.name);
   const energy = _.first(target.miningPos.lookFor(LOOK_ENERGY));
   if (energy) {
-    overseer.tasker.setTempTarget(energy);
+    overseer.tasker.setCreepTarget(c.name, energy);
     return true;
   }
   return false;
@@ -45,7 +46,7 @@ const shouldWithdraw = function(c) {
   const target = overseer.miner.getDumpTruckTarget(c.name);
   const container = target.container;
   if (container) {
-    overseer.tasker.setTempTarget(container);
+    overseer.tasker.setCreepTarget(c.name, container);
     return true;
   }
   return false;
@@ -55,7 +56,7 @@ const shouldTransfer = function(c) {
   if (isEmpty(c)) return false;
   const storage = c.room.storage;
   if (storage) {
-    overseer.tasker.setTempTarget(storage);
+    overseer.tasker.setCreepTarget(c.name, storage);
     return true;
   }
   return false;
@@ -63,18 +64,18 @@ const shouldTransfer = function(c) {
 
 // Actions
 const actionPickup = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignPickup(
-    overseer.tasker.getTempTarget(),
+    overseer.tasker.getCreepTarget(c.name),
     once
   );
   overseer.tasker.setTask(task);
 };
 
 const actionWithdraw = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignWithdraw(
-    overseer.tasker.getTempTarget(),
+    overseer.tasker.getCreepTarget(c.name),
     once,
     RESOURCE_ENERGY
   );
@@ -82,9 +83,9 @@ const actionWithdraw = function(c) {
 };
 
 const actionTransfer = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignTransfer(
-    overseer.tasker.getTempTarget(),
+    overseer.tasker.getCreepTarget(c.name),
     once,
     RESOURCE_ENERGY
   );
@@ -92,9 +93,9 @@ const actionTransfer = function(c) {
 };
 
 const actionMoveToPickup = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignMoveTo(
-    overseer.tasker.getTempTarget(),
+    overseer.tasker.getCreepTarget(c.name),
     isCloseEnoughToPickup, {
       visualizePathStyle: {
         stroke: '#ffffff'
@@ -105,9 +106,9 @@ const actionMoveToPickup = function(c) {
 };
 
 const actionMoveToWithdraw = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignMoveTo(
-    overseer.tasker.getTempTarget(),
+    overseer.tasker.getCreepTarget(c.name),
     isCloseEnoughToWithdraw, {
       visualizePathStyle: {
         stroke: '#ffffff'
@@ -118,9 +119,9 @@ const actionMoveToWithdraw = function(c) {
 };
 
 const actionMoveToTransfer = function(c) {
-  let task = overseer.tasker.getTask(c);
+  let task = new Task(c);
   task.assignMoveTo(
-    overseer.tasker.getTempTarget(),
+    overseer.tasker.getCreepTarget(c.name),
     isCloseEnoughToTransfer, {
       visualizePathStyle: {
         stroke: '#ffffff'
