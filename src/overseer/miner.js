@@ -122,13 +122,9 @@ Miner.prototype.assignNewMiner = function(creepName) {
 };
 
 Miner.prototype.assignNewDumpTruck = function(creepName) {
-  console.log('assignNewDumpTruck creepname: ' + creepName);
   const allFlags = _.keys(overseer.miner.locationDetails);
-  console.log('assignNewDumpTruck allFlags: ' + allFlags);
   const assignedFlags = overseer.miner.getAssignedFlagsDumpTruck();
-  console.log('assignNewDumpTruck assignedFlags: ' + assignedFlags);
   const flagName = _.first(allFlags.filter((x) => !assignedFlags.has(x)));
-  console.log('assignNewDumpTruck flagName: ' + flagName);
   overseer.miner.assignedDumpTrucks[creepName] = flagName;
 };
 

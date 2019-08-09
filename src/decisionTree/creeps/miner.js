@@ -7,6 +7,9 @@ const utils = require('utils');
 const once = (c) => {
   return true
 };
+const forever = (c) => {
+  return false
+};
 const isEmpty = (c) => {
   return c.carry.energy == 0
 };
@@ -25,7 +28,12 @@ const isCloseEnoughToTransfer = (c) => {
 };
 const isOnTargetLocation = (c) => {
   return isWithinDistanceToTarget(c, 0)
-}
+};
+const isOnMiningLocation = (c) => {
+  const target = overseer.miner.getMinerTarget(c.name);
+  return c.pos.getRangeTo(target.miningPos) == 0;
+};
+
 //targetting
 const assignTargetHarvest = function(c) {
   let task = overseer.tasker.getTask(c);
@@ -58,7 +66,7 @@ const actionHarvestEnergy = function(c) {
   const target = overseer.miner.getMinerTarget(c.name);
   task.assignHarvest(
     target.source,
-    isFull,
+    forever,
   );
   overseer.tasker.setTask(task);
 };
@@ -95,7 +103,7 @@ const actionMoveToTransfer = function(c) {
 const DTMinerEmpty = new DecisionCase(
   true,
   Array(
-    new DecisionCase(isCloseEnoughToHarvest, actionHarvestEnergy),
+    new DecisionCase(isOnMiningLocation, actionHarvestEnergy),
     new DecisionCase(true, actionMoveToSource),
   ),
   assignTargetHarvest
@@ -103,7 +111,7 @@ const DTMinerEmpty = new DecisionCase(
 const DTMinerNotEmpty = new DecisionCase(
   true,
   Array(
-    new DecisionCase(isCloseEnoughToTransfer, actionTransfer),
+    new DecisionCase(isOnMiningLocation, actionTransfer),
     new DecisionCase(true, actionMoveToTransfer),
   ),
   assignTargetTransfer

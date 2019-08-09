@@ -73,7 +73,7 @@ const constants = {
       required: 2,
       body: {
         repeating: [WORK],
-        fixed: [CARRY, WORK, MOVE, MOVE, MOVE]
+        fixed: [WORK, MOVE, MOVE, MOVE]
       }
     },
     dumptruck: {

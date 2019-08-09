@@ -1,6 +1,7 @@
 'use strict';
 
 const DecisionCase = require('decisionCase');
+const DTIdler = require('decisionTree.creeps.idler');
 
 // checks
 const once = function(c) {
@@ -19,17 +20,52 @@ const isCloseEnoughToBuild = function(c) {
 const isCloseEnoughToWithdraw = function(c) {
   return isWithinDistanceToTarget(c, 1)
 };
+const cantBuildOrRepair = function(c) {
+  const task = overseer.tasker.getTask(c);
+  if (task.lastReturn != OK || isEmpty(c)) {
+    return true;
+  }
+  return false;
+}
 
-//targetting
-const assignTargetBuild = function(c) {
-  let task = overseer.tasker.getTask(c);
-  task.assignTarget(c.findConstruction() || c.findRepair());
-  overseer.tasker.setTask(task);
+// targetting
+const shouldBuild = function(c) {
+  if (isEmpty(c)) return false;
+  const target = c.findConstruction();
+  if (target) {
+    let task = overseer.tasker.getTask(c);
+    task.assignTarget(target);
+    overseer.tasker.setTask(task);
+    return true;
+  }
+  return false;
 };
-const assignTargetWithdrawEnergy = function(c) {
-  let task = overseer.tasker.getTask(c);
-  task.assignTarget(c.findStorage());
-  overseer.tasker.setTask(task);
+
+const shouldRepair = function(c) {
+  if (isEmpty(c)) return false;
+  const target = c.findRepair();
+  if (target) {
+    let task = overseer.tasker.getTask(c);
+    task.assignTarget(target);
+    overseer.tasker.setTask(task);
+    return true;
+  }
+  return false;
+};
+
+const shouldWithdraw = function(c) {
+  if (!isEmpty(c)) return false;
+
+  const target = c.pos.findClosestByRange(FIND_STRUCTURES, {
+    filter: (s) => s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE && s.store[RESOURCE_ENERGY] > 0
+  });
+  if (target) {
+    let task = overseer.tasker.getTask(c);
+    task.assignTarget(target);
+    overseer.tasker.setTask(task);
+    return true;
+  }
+  return false;
 };
 
 // Actions
@@ -37,29 +73,31 @@ const actionBuild = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignBuild(
     task.target,
-    (c) => {
-      let task = overseer.tasker.getTask(c);
-      if (task.lastReturn != OK || isEmpty(c)) {
-        return true;
-      }
-      return false;
-    }
+    cantBuildOrRepair
   );
   overseer.tasker.setTask(task);
 };
 
-const actionWithdrawEnergy = function(c) {
+const actionRepair = function(c) {
+  let task = overseer.tasker.getTask(c);
+  task.assignRepair(
+    task.target,
+    cantBuildOrRepair
+  );
+  overseer.tasker.setTask(task);
+};
+
+const actionWithdraw = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignWithdraw(
     task.target,
     once,
-    RESOURCE_ENERGY,
-    c.carryCapacity,
+    RESOURCE_ENERGY
   );
   overseer.tasker.setTask(task);
 };
 
-const actionMoveToGetEnergy = function(c) {
+const actionMoveToWithdraw = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignMoveTo(
     task.target,
@@ -86,27 +124,34 @@ const actionMoveToBuild = function(c) {
 };
 
 // decisionTree
-const DTBuilderNotEmpty = new DecisionCase(
+const DTBuilderBuild = new DecisionCase(
   true,
   Array(
     new DecisionCase(isCloseEnoughToBuild, actionBuild),
     new DecisionCase(true, actionMoveToBuild),
-  ),
-  assignTargetBuild
+  )
 );
-const DTBuilderEmpty = new DecisionCase(
+const DTBuilderRepair = new DecisionCase(
   true,
   Array(
-    new DecisionCase(isCloseEnoughToWithdraw, actionWithdrawEnergy),
-    new DecisionCase(true, actionMoveToGetEnergy),
+    new DecisionCase(isCloseEnoughToBuild, actionRepair),
+    new DecisionCase(true, actionMoveToBuild),
+  )
+);
+const DTBuilderWIthdraw = new DecisionCase(
+  true,
+  Array(
+    new DecisionCase(isCloseEnoughToWithdraw, actionWithdraw),
+    new DecisionCase(true, actionMoveToWithdraw),
   ),
-  assignTargetWithdrawEnergy
 );
 const DTBuilder = new DecisionCase(
   true,
   Array(
-    new DecisionCase(isEmpty, DTBuilderEmpty),
-    new DecisionCase(true, DTBuilderNotEmpty),
+    new DecisionCase(shouldBuild, DTBuilderBuild),
+    new DecisionCase(shouldRepair, DTBuilderRepair),
+    new DecisionCase(shouldWithdraw, DTBuilderWIthdraw),
+    new DecisionCase(true, DTIdler),
   )
 );
 

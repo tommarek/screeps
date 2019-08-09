@@ -20,8 +20,24 @@ RoomAnalyzer.prototype.analyzeRoom = function() {
   this.getControllerInfo()
   this.getResourceInfo();
   this.getTerrainInfo();
-
+  this.getHostiles();
 }
+
+RoomAnalyzer.prototype.getHostiles = function() {
+  this.hostiles = _.map(
+    this.room.find(FIND_HOSTILE_CREEPS),
+    (c) => {
+      return {
+        id: c.id,
+        owner: c.owner
+      }
+    }
+  );
+};
+
+RoomAnalyzer.prototype.isRoomSafe = function() {
+  return this.hostiles.length == 0;
+};
 
 RoomAnalyzer.prototype.getControllerInfo = function() {
   var controller = this.room.controller;
@@ -58,24 +74,26 @@ RoomAnalyzer.prototype.getResourceInfo = function() {
     this.memory.mineral = undefined;
   }
 
-  this.memory.tombstones = _.map(this.room.find(FIND_TOMBSTONES), ts => {
-    return {
-      pos: utils.encodePosition(ts.pos),
-      id: ts.id,
-      ticksToDecay: ts.ticksToDecay,
-      store: ts.store,
-    }
-  });
-
-  this.memory.droppedResources = _.reduce(this.room.find(FIND_DROPPED_RESOURCES), (result, value, key) => {
-    (result[value.resourceType] || (result[value.resourceType] = [])).push({
-      pos: utils.encodePosition(value.pos),
-      id: value.id,
-      amount: value.amount,
-      ticksToDecay: utils.calcResourceTTD(value.amount),
+  this.memory.tombstones = _.map(
+    this.room.find(FIND_TOMBSTONES, {filter: (ts) => _.sum(ts.store) > 0}),
+    ts => {
+      return {
+        pos: utils.encodePosition(ts.pos),
+        id: ts.id,
+        ticksToDecay: ts.ticksToDecay,
+        store: ts.store,
+      }
     });
-    return result;
-  });
+
+  // this.memory.droppedResources = _.reduce(this.room.find(FIND_DROPPED_RESOURCES), (result, value, key) => {
+  //   (result[value.resourceType] || (result[value.resourceType] = [])).push({
+  //     pos: utils.encodePosition(value.pos),
+  //     id: value.id,
+  //     amount: value.amount,
+  //     ticksToDecay: utils.calcResourceTTD(value.amount),
+  //   });
+  //   return result;
+  // });
 
 }
 

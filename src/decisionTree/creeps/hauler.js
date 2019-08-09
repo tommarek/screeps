@@ -37,9 +37,8 @@ const actionTransfer = function(c) {
   let task = overseer.tasker.getTask(c);
   task.assignTransfer(
     task.target,
-    isEmpty,
+    once,
     RESOURCE_ENERGY,
-    c.carryCapacity,
   );
   overseer.tasker.setTask(task);
 };
@@ -49,8 +48,7 @@ const actionWithdrawEnergy = function(c) {
   task.assignWithdraw(
     task.target,
     once,
-    RESOURCE_ENERGY,
-    c.carryCapacity,
+    RESOURCE_ENERGY
   );
   overseer.tasker.setTask(task);
 };
@@ -102,6 +100,7 @@ const DTHaulerNotEmpty = new DecisionCase(
 const DTHauler = new DecisionCase(
   true,
   Array(
+    // TODO! conver this to Should.... and add idler branch
     new DecisionCase(isEmpty, DTHaulerEmpty),
     new DecisionCase(true, DTHaulerNotEmpty),
   )

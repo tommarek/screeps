@@ -12,7 +12,6 @@ Task.prototype.execute = function() {
   if (!this.task || !this.object) return null;
   this.refreshObject();
   this.lastReturn = this[this.task]();
-  overseer.tasker.logger.debug('EXECUTING creep ' + this.object.name + ', task: ' + this.task + ' target: ' + this.target + ' ret: ' + this.lastReturn);
   return this.lastReturn;
 }
 
@@ -56,6 +55,15 @@ Task.prototype.assignMoveTo = function(target, taskEndCondition, taskOptions = {
   this.target = target;
   this.taskEndCondition = taskEndCondition;
   this.taskOptions = taskOptions;
+};
+
+Task.prototype.pickup = function() {
+  return this.object.pickup(this.target)
+};
+Task.prototype.assignPickup = function(target, taskEndCondition) {
+  this.task = 'pickup';
+  this.target = target;
+  this.taskEndCondition = taskEndCondition;
 };
 
 Task.prototype.repair = function() {
