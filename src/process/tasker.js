@@ -51,7 +51,7 @@ ProcessTasker.prototype.assignNewTasks = function() {
   _.each(unassigned, (creepName) => {
     const creep = Game.creeps[creepName];
     if (creep && !creep.spawning) {
-      //this.logger.debug('assigning new task to ' + creepName + ', room: ' + creep.pos.roomName);
+      this.logger.debug('assigning new task to ' + creepName + ', room: ' + creep.pos.roomName);
       DTCreeps.evaluate(creep);
     }
   });

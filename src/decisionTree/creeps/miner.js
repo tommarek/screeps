@@ -18,7 +18,6 @@ const isFull = (c) => {
   return _.sum(c.carry) == c.carryCapacity
 };
 const isWithinDistanceToTarget = function(c, range) {
-  console.log(c.name + ': target = ' + overseer.tasker.getCreepTarget(c.name) + ' distance is ' + c.pos.getRangeTo(overseer.tasker.getCreepTarget(c.name)));
   return c.pos.getRangeTo(overseer.tasker.getCreepTarget(c.name)) <= range
 };
 const isCloseEnoughToHarvest = function(c) {
@@ -89,9 +88,10 @@ const actionMine = function(c) {
 
 const actionMoveToMiningLocation = function(c) {
   let task = new Task(c);
+  const target = overseer.miner.getMinerTarget(c.name);
   task.assignMoveTo(
-    overseer.tasker.getCreepTarget(c.name),
-    isOnTargetLocation, {
+    target.miningPos,
+    isOnMiningLocation, {
       visualizePathStyle: {
         stroke: '#ffffff'
       },

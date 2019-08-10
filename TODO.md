@@ -4,6 +4,8 @@
 [x] multitasks - https://docs.screeps.com/simultaneous-actions.html
 [] Idlers
 [] Task dispenser -- creates a list of tasks that should be done this tick and creeps will pick the most suitable based on bodyparts/distance/importance
+[] make miner/dumptruck assignment deterministic
+[] tasker use object IDs instead of objects everywhere - we need to reload the objects anyways.
 
 ## Spawning
 [] automatic spawning
