@@ -3,6 +3,8 @@
 const DecisionCase = require('decisionCase');
 const Task = require('overseer.task');
 
+const utils = require('utils')
+
 // checks
 const once = function(c) {
   return true
@@ -11,7 +13,9 @@ const isEmpty = function(c) {
   return c.carry.energy == 0
 };
 const isWithinDistanceToTarget = function(c, range) {
-  return c.pos.getRangeTo(overseer.tasker.getCreepTarget(c.name)) <= range
+  const targetId = overseer.tasker.getCreepTarget(c.name);
+  if (!targetId) return false;
+  return c.pos.getRangeTo(utils.stringToObject(targetId)) <= range
 };
 const isCloseEnoughToLoot = function(c) {
   return isWithinDistanceToTarget(c, 1)
@@ -45,19 +49,19 @@ const shouldLootTombstones = function(c) {
 
 // Actions
 const actionLoot = function(c) {
-  console.log('idler: looting!');
+  //console.log('idler: looting!');
 };
 
 const actionMoveToLoot = function(c) {
-  console.log('idler: mooving to loot!');
+  //console.log('idler: mooving to loot!');
 };
 
 const actionPickUp = function(c) {
-  console.log('idler: picking up!');
+  //console.log('idler: picking up!');
 };
 
 const actionMoveToPickUp = function(c) {
-  console.log('idler: moving to pickup!');
+  //console.log('idler: moving to pickup!');
 
 };
 

@@ -1,8 +1,9 @@
 'use strict';
 
 const DecisionCase = require('decisionCase');
-const utils = require('utils');
 const Task = require('overseer.task');
+
+const utils = require('utils')
 
 // checks
 const once = (c) => {
@@ -18,7 +19,9 @@ const isFull = (c) => {
   return _.sum(c.carry) == c.carryCapacity
 };
 const isWithinDistanceToTarget = function(c, range) {
-  return c.pos.getRangeTo(overseer.tasker.getCreepTarget(c.name)) <= range
+  const targetId = overseer.tasker.getCreepTarget(c.name);
+  if (!targetId) return false;
+  return c.pos.getRangeTo(utils.stringToObject(targetId)) <= range
 };
 const isCloseEnoughToHarvest = function(c) {
   return isWithinDistanceToTarget(c, 1)
@@ -30,8 +33,9 @@ const isOnTargetLocation = function(c) {
   return isWithinDistanceToTarget(c, 0)
 };
 const isOnMiningLocation = function(c) {
-  const target = overseer.miner.getMinerTarget(c.name);
-  return c.pos.getRangeTo(target.miningPos) == 0;
+  const targetId = overseer.miner.getMinerTarget(c.name);
+  if (!targetId) return false;
+  return c.pos.getRangeTo(utils.stringToObject(targetId.miningPos)) == 0;
 };
 
 //targetting
@@ -39,7 +43,7 @@ const shouldMine = function(c) {
   if (!isEmpty(c)) return false;
   const target = overseer.miner.getMinerTarget(c.name);
   if (target) {
-    overseer.tasker.setCreepTarget(c.name, target.source);
+    overseer.tasker.setCreepTarget(c.name, target.sourceId);
     return true;
   }
   return false;
@@ -49,22 +53,11 @@ const shouldTransfer = function(c) {
   if (c.getActiveBodyparts(CARRY) == 0 || isEmpty(c)) return false;
   const target = overseer.miner.getMinerTarget(c.name);
   if (target.container && container.storeCapacity - _.sum(container.store) < c.carry[RESOURCE_ENERGY]) {
-    overseer.tasker.setCreepTarget(c.name, target.container);
+    overseer.tasker.setCreepTarget(c.name, target.containerId);
     return true;
   }
   return false;
 }
-
-const shouldDrop = function(c) {
-  if (c.getActiveBodyparts(CARRY) == 0 || isEmpty(c)) return false;
-  const target = overseer.miner.getMinerTarget(c.name);
-  if (!target.container) {
-    overseer.tasker.setCreepTarget(c.name, undefined);
-    return true;
-  }
-  return false;
-}
-
 
 // Actions
 const actionTransfer = function(c) {
@@ -83,6 +76,12 @@ const actionMine = function(c) {
     overseer.tasker.getCreepTarget(c.name),
     forever,
   );
+  if (c.getActiveBodyparts(CARRY) !== 0 && !isEmpty(c)) {
+    task.assignDrop(
+      RESOURCE_ENERGY,
+      forever
+    );
+  };
   overseer.tasker.setTask(task);
 };
 

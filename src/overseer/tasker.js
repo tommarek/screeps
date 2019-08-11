@@ -28,9 +28,8 @@ Tasker.prototype.getTask = function(creep) {
 };
 
 Tasker.prototype.setTask = function(task) {
-  const creepName = task.creep.name;
-  this.unassignedCreeps.delete(creepName);
-  this.assignedTasks[creepName] = task;
+  this.unassignedCreeps.delete(task.creepName);
+  this.assignedTasks[task.creepName] = task;
 };
 
 Tasker.prototype.setCreepTarget = function(creepName, target) {
@@ -53,15 +52,20 @@ Tasker.prototype.getMissingCreeps = function() {
     } else if (this.unassignedCreeps.has(creepName)) {
       // this.logger.debug('creep ' + creepName + ' is in unassignedTasks');
     } else {
-      this.logger.info('creep ' + creepName + 'not managed adding it to unassignedCreeps');
+      //this.logger.info('creep ' + creepName + 'not managed adding it to unassignedCreeps');
       this.unassignedCreeps.add(creepName);
     }
   });
 };
 
 Tasker.prototype.clearCreep = function(creepName) {
+  // Unassigned creeps before: builder9402482,hauler9401234,hauler9402434
+  // Unassigned creeps after: builder9402482,hauler9402434  :/
+  console.log('Clearing creep ' + creepName);
+  console.log('Unassigned creeps before: ' + this.getCreepNamesUnassigned());
   this.unassignedCreeps.delete(creepName);
   this.assignedTasks[creepName] = undefined;
+  console.log('Unassigned creeps after: ' + this.getCreepNamesUnassigned());
 };
 
 module.exports = Tasker;

@@ -3,6 +3,8 @@
 const DecisionCase = require('decisionCase');
 const Task = require('overseer.task');
 
+const utils = require('utils')
+
 // checks
 const once = (c) => {
   return true
@@ -13,9 +15,10 @@ const isEmpty = (c) => {
 const isFull = (c) => {
   return _.sum(c.carry) == c.carryCapacity
 };
-const isWithinDistanceToTarget = (c, range) => {
-  const task = overseer.tasker.getTask(c);
-  return c.pos.getRangeTo(task.target) <= range
+const isWithinDistanceToTarget = function(c, range) {
+  const targetId = overseer.tasker.getCreepTarget(c.name);
+  if (!targetId) return false;
+  return c.pos.getRangeTo(utils.stringToObject(targetId)) <= range
 };
 const isCloseEnoughToHarvest = (c) => {
   isWithinDistanceToTarget(c, 1)

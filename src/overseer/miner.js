@@ -46,9 +46,9 @@ Miner.prototype.loadLocationDetails = function(flag) {
   }));
   const miningPos = container.pos;
   this.locationDetails[flag.name] = {
-    source: source,
-    container: container,
-    miningPos: miningPos,
+    sourceId: source.id,
+    containerId: container ? container.id : undefined,
+    miningPos: utils.encodePosition(miningPos),
   };
 }
 

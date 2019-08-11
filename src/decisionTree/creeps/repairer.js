@@ -4,6 +4,8 @@ const DecisionCase = require('decisionCase');
 const DTIdler = require('decisionTree.creeps.idler');
 const Task = require('overseer.task');
 
+const utils = require('utils')
+
 // checks
 const once = function(c) {
   return true
@@ -12,7 +14,9 @@ const isEmpty = function(c) {
   return c.carry.energy == 0
 };
 const isWithinDistanceToTarget = function(c, range) {
-  return c.pos.getRangeTo(overseer.tasker.getCreepTarget(c.name)) <= range
+  const targetId = overseer.tasker.getCreepTarget(c.name);
+  if (!targetId) return false;
+  return c.pos.getRangeTo(utils.stringToObject(targetId)) <= range
 };
 const isCloseEnoughToBuild = function(c) {
   return isWithinDistanceToTarget(c, 3)
@@ -33,7 +37,7 @@ const shouldBuild = function(c) {
   if (isEmpty(c)) return false;
   const target = c.findConstruction();
   if (target) {
-    overseer.tasker.setCreepTarget(c.name, target);
+    overseer.tasker.setCreepTarget(c.name, target.id);
     return true;
   }
   return false;
@@ -43,7 +47,7 @@ const shouldRepair = function(c) {
   if (isEmpty(c)) return false;
   const target = c.findRepair();
   if (target) {
-    overseer.tasker.setCreepTarget(c.name, target);
+    overseer.tasker.setCreepTarget(c.name, target.id);
     return true;
   }
   return false;
@@ -56,7 +60,7 @@ const shouldWithdraw = function(c) {
     filter: (s) => s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE && s.store[RESOURCE_ENERGY] > 0
   });
   if (target) {
-    overseer.tasker.setCreepTarget(c.name, target);
+    overseer.tasker.setCreepTarget(c.name, target.id);
     return true;
   }
   return false;

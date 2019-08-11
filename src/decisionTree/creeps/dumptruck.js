@@ -17,7 +17,9 @@ const isFull = function(c) {
   return _.sum(c.carry) == c.carryCapacity
 };
 const isWithinDistanceToTarget = function(c, range) {
-  return c.pos.getRangeTo(overseer.tasker.getCreepTarget(c.name)) <= range
+  const targetId = overseer.tasker.getCreepTarget(c.name);
+  if (!targetId) return false;
+  return c.pos.getRangeTo(utils.stringToObject(targetId)) <= range
 };
 const isCloseEnoughToPickup = function(c) {
   return isWithinDistanceToTarget(c, 1)
@@ -33,9 +35,10 @@ const isCloseEnoughToTransfer = function(c) {
 const shouldPickup = function(c) {
   if (!isEmpty(c)) return false;
   const target = overseer.miner.getDumpTruckTarget(c.name);
-  const energy = _.first(target.miningPos.lookFor(LOOK_ENERGY));
+  const miningPos = utils.decodePosition(target.miningPos);
+  const energy = _.first(miningPos.lookFor(LOOK_ENERGY));
   if (energy) {
-    overseer.tasker.setCreepTarget(c.name, energy);
+    overseer.tasker.setCreepTarget(c.name, energy.id);
     return true;
   }
   return false;
@@ -44,9 +47,8 @@ const shouldPickup = function(c) {
 const shouldWithdraw = function(c) {
   if (isFull(c)) return false;
   const target = overseer.miner.getDumpTruckTarget(c.name);
-  const container = target.container;
-  if (container) {
-    overseer.tasker.setCreepTarget(c.name, container);
+  if (target.containerId) {
+    overseer.tasker.setCreepTarget(c.name, target.containerId);
     return true;
   }
   return false;
@@ -56,7 +58,7 @@ const shouldTransfer = function(c) {
   if (isEmpty(c)) return false;
   const storage = c.room.storage;
   if (storage) {
-    overseer.tasker.setCreepTarget(c.name, storage);
+    overseer.tasker.setCreepTarget(c.name, storage.id);
     return true;
   }
   return false;

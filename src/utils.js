@@ -23,9 +23,14 @@ const utils = {
 
   calcResourceTTD: function(amount, ticks = 0) {
     const newAmount = Math.ceil(amount / 1000);
-    if (newAmount >= 1) return this.calcResourceTTD(ticks + 1, newAmount);
+    if (newAmount >= 1) return this.calcResourceTTD(newAmount, ticks + 1);
     return newAmount;
-  }
+  },
+
+  stringToObject: function(stringTarget) {
+    return this.decodePosition(stringTarget) || Game.getObjectById(stringTarget);
+  },
+
 }
 
 module.exports = utils;

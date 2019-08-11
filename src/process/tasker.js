@@ -31,7 +31,7 @@ ProcessTasker.prototype.executeAssignedTasks = function() {
       if (ret != OK) {
         overseer.tasker.moveCreepToUnassigned(creepName);
       } else {
-        this.logger.debug(task.creep.name + ': executed task ' + task.subtasks[0].task + '; got return: ' + JSON.stringify(ret));
+        //this.logger.debug(task.creep.name + ': executed task ' + task.subtasks[0].task + '; got return: ' + JSON.stringify(ret));
       }
     }
   });
@@ -45,13 +45,13 @@ ProcessTasker.prototype.assignNewTasks = function() {
   // assign tasks
   const unassigned = overseer.tasker.getCreepNamesUnassigned();
   if (unassigned.length == 0) {
-    this.logger.debug('no unassigned creeps - ignoring');
+    //this.logger.debug('no unassigned creeps - ignoring');
     return;
   }
   _.each(unassigned, (creepName) => {
     const creep = Game.creeps[creepName];
     if (creep && !creep.spawning) {
-      this.logger.debug('assigning new task to ' + creepName + ', room: ' + creep.pos.roomName);
+      //this.logger.debug('assigning new task to ' + creepName + ', room: ' + creep.pos.roomName);
       DTCreeps.evaluate(creep);
     }
   });
