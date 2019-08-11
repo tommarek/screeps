@@ -28,9 +28,9 @@ const cantBuildOrRepair = function(c) {
   const task = overseer.tasker.getTask(c);
   if (task.lastReturn != OK || isEmpty(c)) {
     return true;
-  }
+  };
   return false;
-}
+};
 
 // targetting
 const shouldBuild = function(c) {
@@ -39,7 +39,7 @@ const shouldBuild = function(c) {
   if (target) {
     overseer.tasker.setCreepTarget(c.name, target.id);
     return true;
-  }
+  };
   return false;
 };
 
@@ -49,20 +49,19 @@ const shouldRepair = function(c) {
   if (target) {
     overseer.tasker.setCreepTarget(c.name, target.id);
     return true;
-  }
+  };
   return false;
 };
 
 const shouldWithdraw = function(c) {
   if (!isEmpty(c)) return false;
-
   const target = c.pos.findClosestByRange(FIND_STRUCTURES, {
     filter: (s) => s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE && s.store[RESOURCE_ENERGY] > 0
   });
   if (target) {
     overseer.tasker.setCreepTarget(c.name, target.id);
     return true;
-  }
+  };
   return false;
 };
 

@@ -7,8 +7,24 @@ const Tasker = function(o) {
   this.assignedTasks = {};
 
   this.targets = {};
+  this.otherTasks = {};
   this.logger = o.getLogger('tasker');
 };
+
+Tasker.prototype.initTick = function() {
+  this.targets = {};
+  this.otherTasks = {};
+}
+
+Tasker.prototype.getOtherTasksInRoom = function(roomName) {
+  const roomAnalysis = overseer.getRoomAnalysis(roomName);
+}
+
+Tasker.prototype.generateOtherTasks = function() {
+  _.each(Game.rooms, (roomName) => {
+    this.otherTasks[roomName] = this.getOtherTasksInRoom(roomName);
+  });
+}
 
 Tasker.prototype.getCreepNamesAssigned = function() {
   return _.keys(_.pick(this.assignedTasks, (value, key) => {
@@ -59,13 +75,8 @@ Tasker.prototype.getMissingCreeps = function() {
 };
 
 Tasker.prototype.clearCreep = function(creepName) {
-  // Unassigned creeps before: builder9402482,hauler9401234,hauler9402434
-  // Unassigned creeps after: builder9402482,hauler9402434  :/
-  console.log('Clearing creep ' + creepName);
-  console.log('Unassigned creeps before: ' + this.getCreepNamesUnassigned());
   this.unassignedCreeps.delete(creepName);
   this.assignedTasks[creepName] = undefined;
-  console.log('Unassigned creeps after: ' + this.getCreepNamesUnassigned());
 };
 
 module.exports = Tasker;

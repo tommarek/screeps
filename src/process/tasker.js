@@ -49,10 +49,15 @@ ProcessTasker.prototype.assignNewTasks = function() {
     return;
   }
   _.each(unassigned, (creepName) => {
-    const creep = Game.creeps[creepName];
-    if (creep && !creep.spawning) {
-      //this.logger.debug('assigning new task to ' + creepName + ', room: ' + creep.pos.roomName);
-      DTCreeps.evaluate(creep);
+    if (!creepName in Game.creeps) {
+      this.logger.debug(creepName + ': not in Game.creeps');
+      overseer.tasker.clearCreep(creepName);
+    } else {
+      const creep = Game.creeps[creepName];
+      if (creep && !creep.spawning) {
+        this.logger.debug('assigning new task to ' + creepName + ', room: ' + creep.pos.roomName);
+        DTCreeps.evaluate(creep);
+      }
     }
   });
 }

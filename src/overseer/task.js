@@ -14,7 +14,7 @@ Task.prototype.execute = function() {
   const ret = {};
   _.each(this.subtasks, (subtask) => {
     if (subtask.target) {
-      //overseer.tasker.logger.debug(this.creepName + ': executing ' + JSON.stringify(subtask));
+      overseer.tasker.logger.debug(this.creepName + ': executing ' + JSON.stringify(subtask));
       const lastReturn = this[subtask.task](creep, subtask);
       if (lastReturn != OK) ret[subtask.task] = lastReturn;
     }
