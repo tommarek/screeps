@@ -148,7 +148,7 @@ const DTBuilder = new DecisionCase(
     new DecisionCase(shouldBuild, DTBuild),
     new DecisionCase(shouldRepair, DTRepair),
     new DecisionCase(shouldWithdraw, DTWithdraw),
-    new DecisionCase(true, DTIdler),
+    new DecisionCase(true, overseer.tasker.addIdler),
   )
 );
 

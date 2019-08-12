@@ -21,15 +21,14 @@ ProcessTasker.prototype.run = function() {
 ProcessTasker.prototype.executeAssignedTasks = function() {
   const assigned = overseer.tasker.getCreepNamesAssigned();
   this.logger.debug('executing existing tasks, need to run ' + assigned.length + ' tasks.');
-  this.logger.debug('unassigned creeps :' + JSON.stringify(overseer.tasker.getCreepNamesUnassigned()));
   if (assigned.length == 0) return;
   _.each(overseer.tasker.assignedTasks, (task, creepName) => {
     if (task == undefined) {
-      overseer.tasker.moveCreepToUnassigned(creepName);
+      overseer.tasker.deleteTask(creepName);
     } else {
       const ret = task.execute();
       if (ret != OK) {
-        overseer.tasker.moveCreepToUnassigned(creepName);
+        overseer.tasker.deleteTask(creepName);
       } else {
         //this.logger.debug(task.creep.name + ': executed task ' + task.subtasks[0].task + '; got return: ' + JSON.stringify(ret));
       }
@@ -40,19 +39,11 @@ ProcessTasker.prototype.executeAssignedTasks = function() {
 ProcessTasker.prototype.assignNewTasks = function() {
   // remove invalid or finished tasks so they can be reassigned
   _.each(overseer.tasker.assignedTasks, (task, creepName) => {
-    if (task == undefined || task.isUnusable() ||task.taskEnded()) overseer.tasker.moveCreepToUnassigned(creepName);
+    if (task == undefined || task.isUnusable() ||task.taskEnded()) overseer.tasker.deleteTask(creepName);
   });
   // assign tasks
-  const unassigned = overseer.tasker.getCreepNamesUnassigned();
-  if (unassigned.length == 0) {
-    //this.logger.debug('no unassigned creeps - ignoring');
-    return;
-  }
-  _.each(unassigned, (creepName) => {
-    if (!creepName in Game.creeps) {
-      this.logger.debug(creepName + ': not in Game.creeps');
-      overseer.tasker.clearCreep(creepName);
-    } else {
+  _.each(Game.creeps, (creepName) => {
+    if (!creepName in overseer.tasker.assignedTasks) {
       const creep = Game.creeps[creepName];
       if (creep && !creep.spawning) {
         this.logger.debug('assigning new task to ' + creepName + ', room: ' + creep.pos.roomName);
