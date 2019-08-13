@@ -68,7 +68,7 @@ module.exports = {
             tower.attack(closestHostile);
           } else if (tower.energy > tower.energyCapacity / 2) {
             var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
-              filter: (structure) => structure.hits < structure.hitsMax && structure.hits < 2000000
+              filter: (structure) => structure.hits < structure.hitsMax && structure.hits < 3200000
             });
             if (closestDamagedStructure) {
               tower.repair(closestDamagedStructure);

@@ -62,8 +62,8 @@ const constants = {
         fixed: [WORK, CARRY, MOVE]
       }
     },
-    fixer: {
-      required: 0,
+    repairer: {
+      required: 1,
       body: {
         repeating: [WORK, WORK, CARRY, CARRY, MOVE],
         fixed: [WORK, CARRY, MOVE]

@@ -111,7 +111,7 @@ const actionMoveToWithdraw = function(c) {
 const actionMoveToBuild = function(c) {
   let task = new Task(c);
   task.assignMoveTo(
-    overseer.tasker.getTempTarget(c),
+    overseer.tasker.getCreepTarget(c.name),
     isCloseEnoughToBuild, {
       visualizePathStyle: {
         stroke: '#ffffff'
